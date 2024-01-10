@@ -1,0 +1,3363 @@
+
+
+
+
+
+
+Groupe de travail du réseau T. Berners-Lee
+Demande de commentaires : 1945 MIT/LCS
+Catégorie : Informationnel R. Fielding
+Université de Californie à Irvine
+H. Fristyk
+MIT/LCS
+mai 1996
+
+
+Protocole de transfert hypertexte -- HTTP/1.0
+
+Statut de ce mémo
+
+Ce mémo fournit des informations à la communauté Internet. Ce mémo
+ne spécifie aucune norme Internet d'aucune sorte. Distribution de
+ce mémo est illimité.
+
+Remarque de l'IESG :
+
+L'IESG est préoccupé par ce protocole et attend que ce document
+être remplacé relativement prochainement par un document de normalisation.
+
+Abstrait
+
+Le protocole HTTP (Hypertext Transfer Protocol) est un protocole au niveau de l'application.
+protocole avec la légèreté et la rapidité nécessaires au distribution,
+systèmes d’information collaboratifs et hypermédias. C'est un générique,
+protocole sans état et orienté objet qui peut être utilisé pour de nombreuses tâches,
+tels que les serveurs de noms et les systèmes de gestion d'objets distribués,
+grâce à l'extension de ses méthodes de requête (commandes). Une caractéristique de
+HTTP est le typage de la représentation des données, permettant aux systèmes d'être
+construit indépendamment des données transférées.
+
+HTTP a été utilisé par les informations mondiales du World-Wide Web
+initiative depuis 1990. Cette spécification reflète l’usage courant de
+le protocole dénommé « HTTP/1.0 ».
+
+Table des matières
+
+1. Introduction ............................................................ 4
+1.1 Objet .............................................................. 4
+1.2 Terminologie ............................................ 4
+1.3 Fonctionnement global ............................................ 6
+1.4 HTTP et MIME .................................................. 8
+2. Conventions de notation et grammaire générique ................ 8
+2.1 BNF augmenté ....................................................... 8
+2.2 Règles de base ............................................ 10
+3. Paramètres du protocole ....................................... 12
+
+
+
+Berners-Lee, et al. Informationnel [Page 1]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+3.1 Version HTTP ............................................ 12
+3.2 Identificateurs uniformes de ressources ............................ 14
+3.2.1 Syntaxe générale ................................ 14
+3.2.2 URL http ....................................... 15
+3.3 Formats date/heure .................................. 15
+3.4 Jeux de caractères ...................................... 17
+3.5 Codages de contenu ....................................... 18
+3.6 Types de supports ............................................ 19
+3.6.1 Canonicalisation et paramètres de texte par défaut ............ 19
+3.6.2 Types en plusieurs parties ............................ 20
+3.7 Jetons de produits .................................. 20
+4. Message HTTP ................................................................ 21
+4.1 Types de messages ....................................... 21
+4.2 En-têtes de message ............................................ 22
+4.3 Champs d'en-tête généraux ................................ 23
+5. Demande ............................................................ .... 23
+5.1 Ligne de demande ............................................ 23
+5.1.1 Méthode ............................................ 24
+5.1.2 URI de requête .................................. 24
+5.2 Champs d'en-tête de demande ............................ 25
+6. Réponse ............................................................ ... 25
+6.1 Ligne d'état .................................................. 26
+6.1.1 Code d'état et phrase de raison ............... 26
+6.2 Champs d'en-tête de réponse ............................ 28
+7. Entité ............................................................ ..... 28
+7.1 Champs d'en-tête d'entité ................................ 29
+7.2 Corps de l'entité ....................................... 29
+7.2.1 Type ...................................................... 29
+7.2.2 Longueur ............................................ 30
+8. Définitions des méthodes ....................................... 30
+8.1 OBTENIR .............................................. .. 31
+8.2 TÊTE ............................................... .31
+8.3 PUBLICATION .............................................. .31
+9. Définitions des codes d'état .................................. 32
+9.1 Informations 1xx ..................................... 32
+9.2 2xx réussi ...................................................... 32
+9.3 Redirection 3xx ....................................... 34
+9.4 Erreur client 4xx ..................................... 35
+9.5 Erreur de serveur 5xx ....................................... 37
+10. Définitions des champs d'en-tête .................................. 37
+10.1 Autoriser ...................................................... 38
+10.2 Autorisation ....................................... 38
+10.3 Encodage du contenu .................................. 39
+10.4 Longueur du contenu ....................................... 39
+10.5 Type de contenu ....................................... 40
+10.6 Dates ............................................... 40
+10.7 Expire ..................................................... 41
+10.8 De ............................................... 42
+
+
+
+Berners-Lee, et al. Informationnel [Page 2]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+10.9 Si-Modifié-Depuis .................................. 42
+10.10 Dernière modification ....................................... 43
+10.11 Localisation ............................................ 44
+10.12 Pragma .................................................. 44
+10.13 Référent .................................................. 44
+10.14 Serveur .............................................. 45
+10.15 Agent utilisateur .................................................. 46
+10.16 WWW-Authentifier ..................................... 46
+11. Authentification d'accès .................................. 47
+11.1 Schéma d'authentification de base ....................... 48
+12. Considérations de sécurité .................................. 49
+12.1 Authentification des Clients .............................. 49
+12.2 Méthodes sûres ....................................... 49
+12.3 Abus des informations du journal du serveur ................ 50
+12.4 Transfert d'informations sensibles ................ 50
+12.5 Attaques basées sur les noms de fichiers et de chemins .............. 51
+13. Remerciements ....................................................... 51
+14. Références ............................................................ .52
+15. Adresses des auteurs ....................................... 54
+Annexe A. Message de type de média Internet/http .............. 55
+Annexe B. Applications tolérantes .......................... 55
+Annexe C. Relation avec MIME ............................ 56
+C.1 Conversion à la forme canonique ............................ 56
+C.2 Conversion des formats de date .......................... 57
+C.3 Introduction du codage de contenu ....................... 57
+C.4 Pas de codage de transfert de contenu .............. 57
+C.5 Champs d'en-tête HTTP dans les parties de corps en plusieurs parties ........ 57
+Annexe D. Fonctionnalités supplémentaires ............................ 57
+D.1 Méthodes de requête supplémentaires .............................. 58
+D.1.1 METTRE .............................................. 58
+D.1.2 SUPPRIMER .................................. 58
+D.1.3 LIEN ............................................ 58
+D.1.4 DÉTENDRE LE LIAISON .................................. 58
+D.2 Définitions supplémentaires des champs d'en-tête ....... 58
+D.2.1 Accepter ............................................ 58
+D.2.2 Accepter le jeu de caractères ............................ 59
+D.2.3 Accepter le codage ............................ 59
+D.2.4 Accepter la langue ............................ 59
+D.2.5 Contenu-Langage .............................. 59
+D.2.6 Lien ...................................................... 59
+D.2.7 Version MIME .................................. 59
+D.2.8 Réessayer après .................................. 60
+D.2.9 Titre ............................................ 60
+D.2.10 URI .................................................. 60
+
+
+
+
+
+
+
+Berners-Lee et al. Informationnel [Page 3]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+1. Introduction
+
+1.1 But
+
+Le protocole HTTP (Hypertext Transfer Protocol) est un protocole au niveau de l'application.
+protocole avec la légèreté et la rapidité nécessaires au distribution,
+systèmes d’information collaboratifs et hypermédias. HTTP a été utilisé
+par l'initiative mondiale d'information sur le World-Wide Web depuis 1990.
+la spécification reflète l'usage courant du protocole également appelé
+"HTTP/1.0". Cette spécification décrit les fonctionnalités qui semblent être
+implémenté de manière cohérente dans la plupart des clients et serveurs HTTP/1.0. Le
+la spécification est divisée en deux sections. Ces fonctionnalités de HTTP pour
+dont les implémentations sont généralement cohérentes sont décrites dans le
+corps principal de ce document. Les fonctionnalités qui ont peu ou
+les implémentations incohérentes sont répertoriées dans l’Annexe D.
+
+Les systèmes d’information pratiques nécessitent plus de fonctionnalités que de simples
+récupération, y compris la recherche, la mise à jour frontale et l'annotation. HTTP
+permet d'utiliser un ensemble ouvert de méthodes pour indiquer le
+l'objet d'une demande. Il s'appuie sur la discipline de référence
+fourni par l'Uniform Resource Identifier (URI) [2], en tant qu'emplacement
+(URL) [4] ou nom (URN) [16], pour indiquer la ressource sur laquelle un
+méthode doit être appliquée. Les messages sont transmis dans un format similaire à
+celui utilisé par Internet Mail [7] et le MultiPurpose Internet Mail
+Extensions (MIME) [5].
+
+HTTP est également utilisé comme protocole générique pour la communication entre
+agents utilisateurs et proxys/passerelles vers d'autres protocoles Internet, tels que
+SMTP [12], NNTP [11], FTP [14], Gopher [1] et WAIS [8], permettant
+accès hypermédia de base aux ressources disponibles auprès de divers
+applications et simplifier la mise en œuvre des agents utilisateurs.
+
+1.2 Terminologie
+
+Cette spécification utilise un certain nombre de termes pour désigner les rôles
+joué par les participants et les objets de la communication HTTP.
+
+connexion
+
+Un circuit virtuel de couche transport établi entre deux
+programmes d'application à des fins de communication.
+
+message
+
+L'unité de base de la communication HTTP, composée d'un
+séquence d'octets correspondant à la syntaxe définie à la section 4 et
+transmis via la connexion.
+
+
+
+
+Berners-Lee et coll. Informationnel [Page 4]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+demande
+
+Un message de requête HTTP (tel que défini dans la section 5).
+
+réponse
+
+Un message de réponse HTTP (tel que défini dans la section 6).
+
+Ressource
+
+Un objet ou un service de données réseau qui peut être identifié par un
+URI (Section 3.2).
+
+entité
+
+Une représentation ou un rendu particulier d'une ressource de données, ou
+réponse d'une ressource de service, qui peut être incluse dans un
+message de demande ou de réponse. Une entité est composée de
+métainformations sous forme d'en-têtes d'entité et de contenu dans le
+forme d’un corps d’entité.
+
+client
+
+Un programme d'application qui établit des connexions pour le
+but d’envoyer des demandes.
+
+agent utilisateur
+
+Le client qui initie une demande. Ce sont souvent des navigateurs,
+éditeurs, araignées (robots de navigation sur le Web) ou autres utilisateurs finaux
+outils.
+
+serveur
+
+Un programme d'application qui accepte les connexions afin de
+demandes de service en renvoyant des réponses.
+
+serveur d'origine
+
+Le serveur sur lequel une ressource donnée réside ou doit être créée.
+
+Procuration
+
+Un programme intermédiaire qui agit à la fois comme serveur et client
+dans le but de faire des demandes pour le compte d’autres clients.
+Les demandes sont traitées en interne ou en les transmettant, avec
+traduction possible, sur d'autres serveurs. Un mandataire doit
+interpréter et, si nécessaire, réécrire un message de requête avant
+
+
+
+Berners-Lee et al. Informationnel [Page 5]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+le transmettre. Les proxys sont souvent utilisés comme portails côté client
+via les pare-feu réseau et comme applications d'assistance pour
+traitement des requêtes via des protocoles non implémentés par l'utilisateur
+agent.
+
+passerelle
+
+Un serveur qui sert d'intermédiaire pour un autre serveur.
+Contrairement à un proxy, une passerelle reçoit les requêtes comme si elle était le
+serveur d'origine pour la ressource demandée ; le client demandeur
+il se peut qu'il ne sache pas qu'il communique avec une passerelle.
+Les passerelles sont souvent utilisées comme portails côté serveur via le réseau
+pare-feu et comme traducteurs de protocole pour l'accès aux ressources
+stockés sur des systèmes non HTTP.
+
+tunnel
+
+Un tunnel est un programme intermédiaire qui agit comme un aveugle
+relais entre deux connexions. Une fois actif, un tunnel n'est plus
+considéré comme partie à la communication HTTP, bien que le tunnel
+peut avoir été initié par une requête HTTP. Le tunnel cesse de
+existent lorsque les deux extrémités des connexions relayées sont fermées.
+Les tunnels sont utilisés lorsqu'un portail est nécessaire et que l'intermédiaire
+ne peut pas, ou ne doit pas, interpréter la communication relayée.
+
+cache
+
+Le magasin local de messages de réponse d'un programme et le sous-système
+qui contrôle le stockage, la récupération et la suppression des messages. UN
+le cache stocke les réponses pouvant être mises en cache afin de réduire la réponse
+consommation de temps et de bande passante réseau sur le futur, équivalent
+demandes. Tout client ou serveur peut inclure un cache, bien qu'un
+le cache ne peut pas être utilisé par un serveur tant qu'il fait office de tunnel.
+
+N'importe quel programme donné peut être capable d'être à la fois client et serveur ;
+notre utilisation de ces termes fait uniquement référence au rôle joué par le
+programme pour une connexion particulière, plutôt qu'au programme
+capacités en général. De même, n'importe quel serveur peut faire office d'origine
+serveur, proxy, passerelle ou tunnel, comportement de commutation basé sur le
+nature de chaque demande.
+
+1.3 Fonctionnement global
+
+Le protocole HTTP est basé sur un paradigme requête/réponse. Un client
+établit une connexion avec un serveur et envoie une requête au
+serveur sous la forme d'une méthode de requête, d'un URI et d'une version du protocole,
+suivi d'un message de type MIME contenant des modificateurs de requête, le client
+informations et le contenu éventuel du corps. Le serveur répond par un
+
+
+
+Berners-Lee et coll. Informationnel [Page 6]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+ligne d'état, incluant la version du protocole du message et un succès
+ou un code d'erreur, suivi d'un message de type MIME contenant le serveur
+informations, métainformations d’entité et contenu du corps possible.
+
+La plupart des communications HTTP sont initiées par un agent utilisateur et consistent en
+une requête à appliquer à une ressource sur un serveur d'origine. Dans le
+cas le plus simple, cela peut être réalisé via une seule connexion (v)
+entre l'agent utilisateur (UA) et le serveur d'origine (O).
+
+chaîne de requête --------------->
+UA -------------------v------------------- O
+<----------------------- chaîne de réponse
+
+Une situation plus compliquée se produit lorsqu'un ou plusieurs intermédiaires
+sont présents dans la chaîne requête/réponse. Il y a trois choses communes
+formes d’intermédiaire : proxy, passerelle et tunnel. Un mandataire est un
+transitaire, recevant les demandes d'URI sous sa forme absolue,
+réécrire tout ou partie du message et transmettre le message reformaté
+requête vers le serveur identifié par l’URI. Une passerelle est un
+agent récepteur, agissant comme une couche au-dessus de certains autres serveurs et, si
+nécessaire, traduisant les requêtes vers le serveur sous-jacent
+protocole. Un tunnel fait office de point relais entre deux connexions
+sans changer les messages ; les tunnels sont utilisés lorsque le
+la communication doit passer par un intermédiaire (comme un
+pare-feu) même lorsque l'intermédiaire ne peut pas comprendre le contenu
+des messages.
+
+chaîne de requêtes -------------------------------------->
+UA -----v----- A -----v----- B -----v----- C -----v----- O
+-------------------------------------- chaîne de réponse
+
+La figure ci-dessus montre trois intermédiaires (A, B et C) entre le
+agent utilisateur et serveur d'origine. Un message de demande ou de réponse qui
+parcours, toute la chaîne doit passer par quatre connexions distinctes.
+Cette distinction est importante car certaines options de communication HTTP
+ne peut s'appliquer qu'à la connexion avec le réseau non-tunnel le plus proche
+voisin, uniquement aux extrémités de la chaîne ou à toutes les connexions
+le long de la chaîne. Bien que le diagramme soit linéaire, chaque participant peut
+être engagé dans des communications multiples et simultanées. Par exemple, B
+peut recevoir des demandes de nombreux clients autres que A, et/ou
+transférer les requêtes vers des serveurs autres que C, en même temps qu'il
+gère la demande de A.
+
+Toute partie à la communication qui n'agit pas comme tunnel peut
+utiliser un cache interne pour gérer les demandes. L'effet d'un cache
+est que la chaîne requête/réponse est raccourcie si l'un des
+les participants tout au long de la chaîne ont une réponse en cache applicable à cela
+demande. Ce qui suit illustre la chaîne résultante si B a un
+
+
+
+Berners-Lee et coll. Informationnel [Page 7]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+copie en cache d'une réponse antérieure de O (via C) pour une requête qui
+n'a pas été mis en cache par UA ou A.
+
+chaîne de requête ---------->
+UA -----v----- A -----v----- B - - - - - - C - - - - - - O
+<--------- chaîne de réponse
+
+Toutes les réponses ne peuvent pas être mises en cache et certaines requêtes peuvent contenir
+modificateurs qui imposent des exigences particulières sur le comportement du cache. Quelques
+Les applications HTTP/1.0 utilisent des heuristiques pour décrire ce qui est ou n'est pas un
+réponse « mise en cache », mais ces règles ne sont pas standardisées.
+
+Sur Internet, la communication HTTP s'effectue généralement via TCP/IP
+Connexions. Le port par défaut est TCP 80 [15], mais d'autres ports peuvent être
+utilisé. Cela n'empêche pas que HTTP soit implémenté par-dessus
+tout autre protocole sur Internet, ou sur d'autres réseaux. HTTP uniquement
+suppose un transport fiable ; tout protocole qui fournit un tel
+les garanties peuvent être utilisées, et le mappage de la requête HTTP/1.0 et
+structures de réponse sur les unités de données de transport du protocole dans
+La question sort du cadre de cette spécification.
+
+Sauf pour les applications expérimentales, la pratique actuelle exige que
+la connexion soit établie par le client avant chaque demande et
+fermé par le serveur après l'envoi de la réponse. Les clients et
+les serveurs doivent être conscients que l’une ou l’autre des parties peut fermer la connexion
+prématurément, en raison d'une action de l'utilisateur, d'un délai d'attente automatisé ou d'un programme
+échec et devrait gérer cette clôture de manière prévisible. Dans
+dans tous les cas, la fermeture de la connexion par l'une ou les deux parties
+termine toujours la requête en cours, quel que soit son statut.
+
+1.4 HTTP et MIME
+
+HTTP/1.0 utilise de nombreuses constructions définies pour MIME, telles que définies dans
+RFC1521 [5]. L'Annexe C décrit les façons dont le contexte de
+HTTP permet une utilisation différente des types de médias Internet
+que l'on trouve généralement dans le courrier Internet, et donne la justification de ces
+différences.
+
+2. Conventions de notation et grammaire générique
+
+2.1 BNF augmenté
+
+Tous les mécanismes spécifiés dans ce document sont décrits dans
+à la fois de la prose et une forme Backus-Naur augmentée (BNF) similaire à celle
+utilisé par la RFC 822 [7]. Les responsables de la mise en œuvre devront se familiariser avec
+notation afin de comprendre cette spécification. Le BNF augmenté
+comprend les constructions suivantes :
+
+
+
+
+Berners-Lee et al. Informationnel [Page 8]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+nom = définition
+
+Le nom d'une règle est simplement le nom lui-même (sans aucun
+entourant "<" et ">") et est séparé de sa définition par
+le caractère égal "=". Les espaces n'ont de sens que dans la mesure où
+l'indentation des lignes de continuation est utilisée pour indiquer une règle
+définition qui s’étend sur plus d’une ligne. Certaines règles de base
+sont en majuscules, comme SP, LWS, HT, CRLF, DIGIT, ALPHA, etc.
+Les crochets angulaires sont utilisés dans les définitions chaque fois que leur
+leur présence facilitera le discernement de l’utilisation des noms de règles.
+
+"littéral"
+
+Les guillemets entourent le texte littéral. Sauf indication contraire,
+le texte n'est pas sensible à la casse.
+
+règle1 | règle2
+
+Les éléments séparés par une barre ("I") sont des alternatives,
+par exemple, "oui | non" acceptera oui ou non.
+
+(règle1 règle2)
+
+Les éléments entre parenthèses sont traités comme un seul
+élément. Ainsi, "(elem (foo | bar) elem)" permet au jeton
+séquences "elem foo elem" et "elem bar elem".
+
+*règle
+
+Le caractère "*" précédant un élément indique une répétition. Le
+la forme complète est "<n>*<m>élément" indiquant au moins <n> et à
+la plupart des <m> occurrences de l'élément. Les valeurs par défaut sont 0 et
+l'infini pour que "*(element)" autorise n'importe quel nombre, y compris zéro ;
+"1*élément" en nécessite au moins un ; et "1*2element" permet à un
+ou deux.
+
+[règle]
+
+Les crochets entourent les éléments facultatifs ; "[foo bar]" est
+équivalent à "*1(foo bar)".
+
+Règle N
+
+Répétition spécifique : "<n>(élément)" équivaut à
+"<n>*<n>(élément)" ; c'est-à-dire exactement <n> occurrences de
+(élément). Ainsi 2DIGIT est un nombre à 2 chiffres et 3ALPHA est un
+chaîne de trois caractères alphabétiques.
+
+
+
+
+Berners-Lee et coll. Informationnel [Page 9]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+#règle
+
+Une construction "#" est définie, similaire à "*", pour définir des listes
+d'éléments. La forme complète est "<n>#<m>element" indiquant à
+au moins <n> et au plus <m> éléments, chacun séparé par un ou
+plus de virgules (",") et des espaces linéaires facultatifs (LWS). Ce
+rend la forme habituelle des listes très simple ; une règle telle que
+"( *LWS element *( *LWS "," *LWS element ))" peut être affiché comme
+"1#élément". Partout où cette construction est utilisée, les éléments nuls sont
+autorisés, mais ne contribuent pas au décompte des éléments présents.
+Autrement dit, "(élément), , (élément)" est autorisé, mais compte comme
+seulement deux éléments. Par conséquent, là où au moins un élément est
+requis, au moins un élément non nul doit être présent. Défaut
+les valeurs sont 0 et l'infini afin que "#(element)" autorise tout
+nombre, y compris zéro ; "1#element" en nécessite au moins un ; et
+"1#2element" en autorise un ou deux.
+
+; commentaire
+
+Un point-virgule, placé à une certaine distance à droite du texte de la règle,
+commence un commentaire qui continue jusqu'à la fin de la ligne. C'est un
+moyen simple d'inclure des notes utiles en parallèle avec le
+Caractéristiques.
+
+implicite *LWS
+
+La grammaire décrite par cette spécification est basée sur les mots.
+Sauf indication contraire, les espaces linéaires (LWS) peuvent être
+inclus entre deux mots adjacents (jeton ou
+chaîne entre guillemets), et entre les jetons et délimiteurs adjacents
+(tspecials), sans changer l'interprétation d'un champ. À
+au moins un délimiteur (tspecials) doit exister entre deux
+jetons, car ils seraient autrement interprétés comme un seul
+jeton. Toutefois, les candidatures doivent tenter de suivre les « règles communes »
+form" lors de la génération de constructions HTTP, car il existe des
+des implémentations qui n'acceptent rien au-delà du commun
+formes.
+
+2.2 Règles de base
+
+Les règles suivantes sont utilisées tout au long de cette spécification pour
+décrire les constructions d'analyse de base. Le jeu de caractères codés US-ASCII
+est défini par [17].
+
+OCTET = <n'importe quelle séquence de données de 8 bits>
+CHAR = <n'importe quel caractère US-ASCII (octets 0 à 127)>
+UPALPHA = <n'importe quelle lettre majuscule US-ASCII "A".."Z">
+LOALPHA = <n'importe quelle lettre minuscule US-ASCII "a".."z">
+
+
+
+Berners-Lee et coll. Informationnel [Page 10]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+ALPHA = UPALPHA | LOALPHA
+DIGIT = <n'importe quel chiffre US-ASCII "0".."9">
+CTL = <n'importe quel caractère de contrôle US-ASCII
+(octets 0 à 31) et DEL (127)>
+CR = <US-ASCII CR, retour chariot (13)>
+LF = <US-ASCII LF, saut de ligne (10)>
+SP = <US-ASCII SP, espace (32)>
+HT = <US-ASCII HT, onglet horizontal (9)>
+<"> = <Guillemets doubles US-ASCII (34)>
+
+HTTP/1.0 définit la séquence d'octets CR LF comme marqueur de fin de ligne
+pour tous les éléments du protocole à l'exception de l'Entité-Corps (voir l'Annexe B pour
+applications tolérantes). Le marqueur de fin de ligne au sein d'un Entity-Body
+est défini par son type de média associé, comme décrit au paragraphe 3.6.
+
+CRLF = CRLF
+
+Les en-têtes HTTP/1.0 peuvent être repliés sur plusieurs lignes si chacune
+la ligne de continuation commence par un espace ou une tabulation horizontale. Tout linéaire
+les espaces, y compris le pliage, ont la même sémantique que SP.
+
+LWS = [CRLF] 1*( SP | HT )
+
+Cependant, certains ne s'attendent pas à ce que les lignes d'en-tête soient repliées.
+applications et ne doivent pas être générés par les applications HTTP/1.0.
+
+La règle TEXTE n'est utilisée que pour le contenu et les valeurs des champs descriptifs.
+qui ne sont pas destinés à être interprétés par l’analyseur de messages. Mots
+de *TEXT peut contenir des octets provenant de jeux de caractères autres que US-ASCII.
+
+TEXT = <n'importe quel OCTET sauf les CTL,
+mais incluant LWS>
+
+Destinataires du champ d'en-tête TEXT contenant des octets en dehors des États-Unis.
+Le jeu de caractères ASCII peut supposer qu'ils représentent ISO-8859-1
+personnages.
+
+Les caractères numériques hexadécimaux sont utilisés dans plusieurs éléments du protocole.
+
+HEX = "A" | "B" | "C" | "D" | "E" | "F"
+| "un" | "b" | "c" | "d" | "e" | "f" | CHIFFRE
+
+De nombreuses valeurs de champ d'en-tête HTTP/1.0 sont constituées de mots séparés par LWS
+ou des caractères spéciaux. Ces caractères spéciaux doivent être entre guillemets
+chaîne à utiliser dans une valeur de paramètre.
+
+mot = jeton | chaîne entre guillemets
+
+
+
+
+Berners-Lee et coll. Informationnel [Page 11]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+token = 1*<n'importe quel CHAR sauf CTL ou tspecials>
+
+tspecials = "(" | ")" | "<" | ">" | "@"
+| "," | ";" | ":" | "\" | <">
+| "/" | "[" | "]" | "?" | "="
+| "{" | "}" | PS | HT
+
+Des commentaires peuvent être inclus dans certains champs d'en-tête HTTP en les entourant
+le texte du commentaire entre parenthèses. Les commentaires ne sont autorisés que dans
+champs contenant « commentaire » dans le cadre de la définition de leur valeur de champ.
+Dans tous les autres champs, les parenthèses sont considérées comme faisant partie du champ
+valeur.
+
+commentaire = "(" *( ctext | commentaire ) ")"
+ctext = <tout TEXTE excluant "(" et ")">
+
+Une chaîne de texte est analysée comme un seul mot si elle est citée à l'aide de
+guillemets doubles.
+
+chaîne entre guillemets = ( <"> *(qdtext) <"> )
+
+qdtext = <n'importe quel CHAR sauf <"> et CTL,
+mais incluant LWS>
+
+Les guillemets à un seul caractère utilisant la barre oblique inverse ("\") ne sont pas
+autorisé dans HTTP/1.0.
+
+3. Paramètres du protocole
+
+3.1 Version HTTP
+
+HTTP utilise un schéma de numérotation "<major>.<minor>" pour indiquer les versions
+du protocole. La politique de gestion des versions du protocole est destinée à permettre
+l'expéditeur d'indiquer le format d'un message et sa capacité de
+comprendre davantage la communication HTTP, plutôt que les fonctionnalités
+obtenu via cette communication. Aucune modification n'est apportée à la version
+numéro pour l'ajout de composants de message qui n'affectent pas
+comportement de communication ou qui ne font qu'ajouter aux valeurs des champs extensibles.
+Le numéro <mineur> est incrémenté lorsque les modifications apportées au
+le protocole ajoute des fonctionnalités qui ne modifient pas l'analyse générale des messages
+algorithme, mais qui peut ajouter à la sémantique du message et impliquer
+capacités supplémentaires de l'expéditeur. Le numéro <majeur> est
+incrémenté lorsque le format d'un message au sein du protocole est
+modifié.
+
+La version d'un message HTTP est indiquée par un champ HTTP-Version
+dans la première ligne du message. Si la version du protocole n'est pas
+spécifié, le destinataire doit supposer que le message est dans le
+
+
+
+Berners-Lee et coll. Informationnel [Page 12]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+format HTTP/0.9 simple.
+
+Version HTTP = "HTTP" "/" 1*DIGIT "." 1 * CHIFFRE
+
+Notez que les nombres majeurs et mineurs doivent être traités séparément.
+nombres entiers et que chacun peut être incrémenté au-dessus d’un seul chiffre.
+Ainsi, HTTP/2.4 est une version inférieure à HTTP/2.13, qui à son tour est
+inférieur à HTTP/12.3. Les zéros non significatifs doivent être ignorés par les destinataires
+et jamais généré par les expéditeurs.
+
+Ce document définit les versions 0.9 et 1.0 du HTTP
+protocole. Applications envoyant une demande complète ou une réponse complète
+les messages, tels que définis par cette spécification, doivent inclure un HTTP-
+Version de "HTTP/1.0".
+
+Les serveurs HTTP/1.0 doivent :
+
+o reconnaître le format de la Request-Line pour HTTP/0.9 et
+Requêtes HTTP/1.0 ;
+
+o comprendre toute requête valide au format HTTP/0.9 ou
+HTTP/1.0 ;
+
+o répondre de manière appropriée avec un message dans le même protocole
+version utilisée par le client.
+
+Les clients HTTP/1.0 doivent :
+
+o reconnaître le format de la Status-Line pour les réponses HTTP/1.0 ;
+
+o comprendre toute réponse valide au format HTTP/0.9 ou
+HTTP/1.0.
+
+Les applications proxy et passerelle doivent être prudentes lors du transfert des demandes
+qui sont reçus dans un format différent de celui du
+version HTTP native de l'application. Depuis la version du protocole
+indique la capacité de protocole de l'expéditeur, un proxy/passerelle doit
+n'envoyez jamais de message avec un indicateur de version supérieur à
+sa version native ; si une demande de version supérieure est reçue, le
+le proxy/passerelle doit soit rétrograder la version de la demande, soit répondre
+avec une erreur. Requêtes avec une version inférieure à celle du
+le format natif de l'application peut être mis à niveau avant d'être transmis ;
+la réponse du proxy/passerelle à cette demande doit suivre le serveur
+exigences énumérées ci-dessus.
+
+
+
+
+
+
+
+Berners-Lee et coll. Informationnel [Page 13]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+3.2 Identificateurs de ressources uniformes
+
+Les URI sont connus sous de nombreux noms : adresses WWW, document universel
+Identifiants, Identifiants de ressources universels [2], et enfin les
+combinaison de localisateurs de ressources uniformes (URL) [4] et de noms (URN)
+[16]. En ce qui concerne HTTP, les Uniform Resource Identifiers sont
+des chaînes simplement formatées qui identifient - via le nom, l'emplacement ou tout autre
+autre caractéristique : une ressource réseau.
+
+3.2.1 Syntaxe générale
+
+Les URI en HTTP peuvent être représentés sous forme absolue ou relative à certains
+URI de base connue [9], en fonction du contexte de leur utilisation. Les deux
+les formes se différencient par le fait que les URI absolus commencent toujours par
+avec un nom de schéma suivi de deux points.
+
+URI = (URIabsolu | URIrelatif) [fragment "#"]
+
+absoluURI = schéma ":" *( uchar | réservé )
+
+relativeURI = net_path | abs_path | chemin_rel
+
+net_path = "//" net_loc [ chemin_abs ]
+abs_path = "/" chemin_rel
+rel_path = [ chemin ] [ ";" paramètres ] [ "?" requête ]
+
+chemin = fsegment *( "/" segment )
+fsegment = 1*pchar
+segment = *pchar
+
+params = param *( ";" param )
+param = *( pchar | "/" )
+
+schéma = 1*( ALPHA | CHIFFRE | "+" | "-" | "." )
+net_loc = *( pchar | ";" | "?" )
+query = *(uchar | réservé)
+fragment = *(uchar | réservé)
+
+pchar = uchar | ":" | "@" | "&" | "=" | "+"
+uchar = sans réserve | s'échapper
+sans réserve = ALPHA | CHIFFRE | coffre-fort | supplémentaire | national
+
+échappement = "%" HEX HEX
+réservé = ";" | "/" | "?" | ":" | "@" | "&" | "=" | "+"
+supplémentaire = "!" | "*" | "'" | "(" | ")" | ","
+coffre-fort = "$" | "-" | "_" | "."
+dangereux = CTL | PS | <"> | "#" | "%" | "<" | ">"
+national = <tout OCTET à l'exclusion de ALPHA, DIGIT,
+
+
+
+Berners-Lee et coll. Informationnel [Page 14]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+réservé, supplémentaire, sûr et dangereux>
+
+Pour des informations définitives sur la syntaxe et la sémantique des URL, voir RFC 1738.
+[4] et RFC 1808 [9]. Le BNF ci-dessus comprend des caractères nationaux non
+autorisé dans les URL valides comme spécifié par RFC 1738, puisque les serveurs HTTP
+ne sont pas limités dans l'ensemble des caractères non réservés autorisés à
+représentent la partie rel_path des adresses, et les proxys HTTP peuvent
+recevoir des demandes d'URI non définis par la RFC 1738.
+
+3.2.2 URL http
+
+Le schéma "http" est utilisé pour localiser les ressources réseau via le protocole HTTP
+protocole. Cette section définit la syntaxe spécifique au schéma et
+sémantique des URL http.
+
+http_URL = "http:" "//" hôte [ ":" port ] [ chemin_abs ]
+
+host = <Un nom de domaine d'hôte Internet légal
+ou adresse IP (sous forme décimale pointée),
+tel que défini par la section 2.1 de la RFC 1123>
+
+port = *CHIFFRE
+
+Si le port est vide ou n'est pas indiqué, le port 80 est supposé. La sémantique
+sont que la ressource identifiée se trouve au niveau du serveur en écoute
+pour les connexions TCP sur ce port de cet hôte, et le Request-URI
+car la ressource est abs_path. Si abs_path n'est pas présent dans le
+URL, elle doit être indiquée sous la forme "/" lorsqu'elle est utilisée comme Request-URI (Section
+5.1.2).
+
+Remarque : Bien que le protocole HTTP soit indépendant du protocole de transport
+protocole de couche, l'URL http identifie uniquement les ressources par leur
+L'emplacement TCP, et donc les ressources non TCP, doivent être identifiés par
+un autre schéma d'URI.
+
+La forme canonique des URL "http" est obtenue en convertissant n'importe quel
+Caractères UPALPHA dans l'hôte vers leur équivalent LOALPHA (les noms d'hôte sont
+insensible à la casse), en éliminant le [ : port ] si le port est 80, et
+remplacer un abs_path vide par "/".
+
+3.3 Formats date/heure
+
+Les applications HTTP/1.0 ont historiquement permis trois
+formats pour la représentation des horodatages :
+
+Dimanche 6 novembre 1994 08:49:37 GMT ; RFC 822, mise à jour par RFC 1123
+Dimanche 6 novembre 1994 à 08:49:37 GMT ; RFC 850, obsolète par RFC 1036
+Dim 6 novembre 08:49:37 1994 ; Format asctime() d'ANSI C
+
+
+
+Berners-Lee et coll. Informationnel [Page 15]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+Le premier format est préféré comme norme Internet et représente
+un sous-ensemble de longueur fixe de celui défini par la RFC 1123 [6] (une mise à jour de
+RFC822 [7]). Le deuxième format est d'usage courant, mais il est basé sur le
+format de date obsolète RFC 850 [10] et il manque une année à quatre chiffres.
+Les clients et serveurs HTTP/1.0 qui analysent la valeur de date doivent accepter
+les trois formats, mais ils ne doivent jamais générer le troisième
+(heure asc).
+
+Remarque : Les destinataires des valeurs de date sont encouragés à faire preuve de robustesse dans
+accepter des valeurs de date qui peuvent avoir été générées par des méthodes non HTTP
+applications, comme c'est parfois le cas lors de la récupération ou de la publication
+messages via proxys/passerelles vers SMTP ou NNTP.
+
+Tous les horodatages HTTP/1.0 doivent être représentés en temps universel
+(UT), également connu sous le nom de Greenwich Mean Time (GMT), sans exception.
+Ceci est indiqué dans les deux premiers formats par l'inclusion de "GMT".
+comme abréviation à trois lettres pour le fuseau horaire, et doit être supposé
+lors de la lecture du format asctime.
+
+Date HTTP = date-rfc1123 | date rfc850 | asctime-date
+
+rfc1123-date = jour semaine "," SP date1 SP heure SP "GMT"
+rfc850-date = jour de la semaine "," SP date2 Heure SP SP "GMT"
+asctime-date = jour semaine SP date3 SP heure SP 4DIGIT
+
+date1 = 2 CHIFFRES SP mois SP 4 CHIFFRES
+; jour mois année (par exemple, 02 juin 1982)
+date2 = 2CHIFFRES "-" mois "-" 2CHIFFRES
+; jour-mois-année (par exemple, 02-juin-82)
+date3 = mois SP ( 2DIGIT | ( SP 1DIGIT ))
+; jour du mois (par exemple, 2 juin)
+
+heure = 2 CHIFFRES ":" 2 CHIFFRES ":" 2 CHIFFRES
+; 00:00:00 - 23:59:59
+
+jour de la semaine = "Lun" | "Mardi" | "Épouser"
+| "Jeudi" | "Vendredi" | "Samedi" | "Soleil"
+
+jour de la semaine = "Lundi" | "Mardi" | "Mercredi"
+| "Jeudi" | "Vendredi" | "Samedi" | "Dimanche"
+
+mois = "janvier" | "Février" | "Mars" | "Avr"
+| "Mai" | "Juin" | "Juillet" | "Août"
+| "Septembre" | "Octobre" | "novembre" | "Déc"
+
+Remarque : les exigences HTTP pour le format d'horodatage s'appliquent.
+uniquement à leur utilisation dans le flux de protocole. Clients et
+les serveurs ne sont pas obligés d'utiliser ces formats pour l'utilisateur
+
+
+
+Berners-Lee et coll. Informationnel [Page 16]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+présentation, journalisation des demandes, etc.
+
+3.4 Jeux de caractères
+
+HTTP utilise la même définition du terme « jeu de caractères » que celui
+décrit pour MIME :
+
+Le terme « jeu de caractères » est utilisé dans ce document pour désigner un
+méthode utilisée avec une ou plusieurs tables pour convertir une séquence de
+octets en une séquence de caractères. Notez qu'inconditionnel
+la conversion dans l'autre sens n'est pas nécessaire, dans la mesure où tous les
+les caractères peuvent être disponibles dans un jeu de caractères donné et un
+le jeu de caractères peut fournir plus d'une séquence d'octets à
+représentent un personnage particulier. Cette définition vise à
+permettre différents types de codages de caractères, du simple simple
+mappages de tables tels que US-ASCII vers des méthodes de commutation de tables complexes
+comme ceux qui utilisent les techniques de l'ISO 2022. Cependant, le
+la définition associée à un nom de jeu de caractères MIME doit être entièrement
+spécifiez le mappage à effectuer des octets aux caractères. Dans
+en particulier, l'utilisation d'informations de profilage externes pour déterminer le
+une cartographie exacte n’est pas autorisée.
+
+Remarque : Cette utilisation du terme « jeu de caractères » est plus couramment utilisée
+appelé « encodage de caractères ». Cependant, puisque HTTP et
+MIME partage le même registre, il est important que la terminologie
+également être partagé.
+
+Les jeux de caractères HTTP sont identifiés par des jetons insensibles à la casse. Le
+un ensemble complet de jetons est défini par le registre des jeux de caractères IANA
+[15]. Cependant, comme ce registre ne définit pas un seul,
+jeton cohérent pour chaque jeu de caractères, nous définissons ici le jeton préféré
+noms des jeux de caractères les plus susceptibles d'être utilisés avec HTTP
+entités. Ces jeux de caractères incluent ceux enregistrés par RFC 1521
+[5] -- les jeux de caractères US-ASCII [17] et ISO-8859 [18] -- et
+autres noms spécifiquement recommandés pour une utilisation dans le jeu de caractères MIME
+paramètres.
+
+jeu de caractères = "US-ASCII"
+| "ISO-8859-1" | "ISO-8859-2" | "ISO-8859-3"
+| "ISO-8859-4" | "ISO-8859-5" | "ISO-8859-6"
+| "ISO-8859-7" | "ISO-8859-8" | "ISO-8859-9"
+| "ISO-2022-JP" | "ISO-2022-JP-2" | "ISO-2022-KR"
+| "UNICODE-1-1" | "UNICODE-1-1-UTF-7" | "UNICODE-1-1-UTF-8"
+| jeton
+
+Bien que HTTP permette d'utiliser un jeton arbitraire comme jeu de caractères
+valeur, tout jeton qui a une valeur prédéfinie au sein de l'IANA
+Le registre des jeux de caractères [15] doit représenter le jeu de caractères défini
+
+
+
+Berners-Lee et coll. Informationnel [Page 17]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+par ce registre. Les applications doivent limiter leur utilisation du caractère
+ensembles à ceux définis par le registre IANA.
+
+Le jeu de caractères d'un corps d'entité doit être étiqueté comme le plus bas
+dénominateur commun des codes de caractères utilisés au sein de ce corps, avec
+à l'exception du fait qu'aucune étiquette n'est préférée aux étiquettes US-ASCII ou
+ISO-8859-1.
+
+3.5 Codages de contenu
+
+Les valeurs de codage de contenu sont utilisées pour indiquer une transformation de codage
+qui a été appliqué à une ressource. Les codages de contenu sont principalement
+utilisé pour permettre à un document d'être compressé ou chiffré sans perte
+l'identité de son type de média sous-jacent. Généralement, la ressource est
+stocké dans cet encodage et décodé uniquement avant le rendu ou
+usage analogue.
+
+codage de contenu = "x-gzip" | "x-compresser" | jeton
+
+Remarque : Pour une compatibilité future, les applications HTTP/1.0 doivent
+considérez "gzip" et "compress" comme étant équivalents à "x-gzip"
+et "x-compress", respectivement.
+
+Toutes les valeurs de codage de contenu ne sont pas sensibles à la casse. Utilisations HTTP/1.0
+valeurs de codage de contenu dans l'en-tête Content-Encoding (Section 10.3)
+champ. Bien que la valeur décrive le codage du contenu, qui plus est
+l'important est qu'il indique quel sera le mécanisme de décodage
+nécessaire pour supprimer le codage. Notez qu'un seul programme peut être
+capable de décoder plusieurs formats de codage de contenu. Deux valeurs sont
+défini par cette spécification :
+
+x-gzip
+Un format d'encodage produit par le programme de compression de fichiers
+"gzip" (GNU zip) développé par Jean-loup Gailly. Ce format est
+généralement un codage Lempel-Ziv (LZ77) avec un CRC 32 bits.
+
+x-compresser
+Le format d'encodage produit par le programme de compression de fichiers
+"compresse". Ce format est un codage adaptatif de Lempel-Ziv-Welch
+(LZW).
+
+Remarque : Utilisation de noms de programme pour l'identification
+les formats d’encodage ne sont pas souhaitables et devraient être découragés
+pour les futurs encodages. Leur utilisation ici est représentative de
+pratique historique, pas une bonne conception.
+
+
+
+
+
+
+Berners-Lee et coll. Informationnel [Page 18]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+3.6 Types de médias
+
+HTTP utilise les types de médias Internet [13] dans le champ d'en-tête Content-Type
+(Section 10.5) afin de fournir un typage de données ouvert et extensible.
+
+media-type = type "/" sous-type *( paramètre ";" )
+type = jeton
+sous-type = jeton
+
+Les paramètres peuvent suivre le type/sous-type sous forme d'attribut/valeur
+paires.
+
+paramètre = attribut "=" valeur
+attribut = jeton
+valeur = jeton | chaîne entre guillemets
+
+Les noms d'attribut de type, de sous-type et de paramètre sont en casse.
+insensible. Les valeurs des paramètres peuvent ou non être sensibles à la casse,
+en fonction de la sémantique du nom du paramètre. LWS ne doit pas être
+généré entre le type et le sous-type, ni entre un attribut et
+Sa valeur. À la réception d'un type de média avec un nom non reconnu
+paramètre, un agent utilisateur doit traiter le type de média comme si le
+paramètre non reconnu et sa valeur n’était pas présente.
+
+Certaines anciennes applications HTTP ne reconnaissent pas les paramètres de type de média.
+Les applications HTTP/1.0 ne doivent utiliser les paramètres de type de média que lorsqu'elles
+sont nécessaires pour définir le contenu d’un message.
+
+Les valeurs de type de média sont enregistrées avec le numéro attribué par Internet
+Autorité (IANA [15]). Le processus d'enregistrement du type de média est
+décrit dans la RFC 1590 [13]. L'utilisation de types de médias non enregistrés est
+découragé.
+
+3.6.1 Canonisation et paramètres de texte par défaut
+
+Les types de médias Internet sont enregistrés sous une forme canonique. Dans
+En général, une Entité-Corps transférée via HTTP doit être représentée dans
+la forme canonique appropriée avant sa transmission. Si le corps
+a été codé avec un Content-Encoding, les données sous-jacentes doivent
+être sous forme canonique avant d’être codé.
+
+Les sous-types de média de type "texte" utilisent CRLF comme saut de ligne de texte
+lorsqu'il est sous forme canonique. Cependant, HTTP permet le transport de texte
+média avec CR ou LF simples représentant seuls un saut de ligne lorsqu'ils sont utilisés
+de manière cohérente au sein de l’Entité-Corps. Les applications HTTP doivent accepter
+CRLF, CR nu et LF nu comme étant représentatifs d'une rupture de ligne dans
+médias texte reçus via HTTP.
+
+
+
+
+Berners-Lee et coll. Informationnel [Page 19]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+De plus, si le support texte est représenté dans un jeu de caractères qui
+n'utilise pas les octets 13 et 10 pour CR et LF respectivement, comme c'est le cas du
+cas pour certains jeux de caractères multi-octets, HTTP permet l'utilisation de
+quelles que soient les séquences d'octets définies par ce caractère défini sur
+représentent l'équivalent de CR et LF pour les sauts de ligne. Ce
+la flexibilité concernant les sauts de ligne s'applique uniquement aux supports texte dans le
+Entité-Corps ; un CR ou un LF nu ne doit pas remplacer le CRLF
+dans l'une des structures de contrôle HTTP (telles que les champs d'en-tête et
+limites en plusieurs parties).
+
+Le paramètre "charset" est utilisé avec certains types de médias pour définir le
+jeu de caractères (Section 3.4) des données. Lorsqu'il n'y a pas de jeu de caractères explicite
+Le paramètre est fourni par l'expéditeur, les sous-types de média du "texte"
+type sont définis pour avoir une valeur de jeu de caractères par défaut de "ISO-8859-1" lorsque
+reçu via HTTP. Données dans des jeux de caractères autres que "ISO-8859-1" ou
+ses sous-ensembles doivent être étiquetés avec une valeur de jeu de caractères appropriée dans
+afin d’être interprété de manière cohérente par le destinataire.
+
+Remarque : De nombreux serveurs HTTP actuels fournissent des données à l'aide de jeux de caractères autres que
+que « ISO-8859-1 » sans étiquetage approprié. Cette situation réduit
+interopérabilité et n’est pas recommandé. Pour compenser cela,
+certains agents utilisateurs HTTP fournissent une option de configuration pour permettre au
+l'utilisateur peut modifier l'interprétation par défaut du type de média
+jeu de caractères lorsqu'aucun paramètre charset n'est donné.
+
+3.6.2 Types en plusieurs parties
+
+MIME fournit un certain nombre de types "multipart" -- des encapsulations de
+plusieurs entités au sein du corps-entité d'un même message. Le multipart
+les types enregistrés par l'IANA [15] n'ont pas de signification particulière pour
+HTTP/1.0, bien que les agents utilisateurs puissent avoir besoin de comprendre chaque type dans
+afin d'interpréter correctement le but de chaque partie du corps. Un HTTP
+l'agent utilisateur doit suivre un comportement identique ou similaire à celui d'un utilisateur MIME
+l'agent le fait à la réception d'un type multipart. Les serveurs HTTP ne devraient pas
+supposons que tous les clients HTTP sont prêts à gérer les types multiparts.
+
+Tous les types multipart partagent une syntaxe commune et doivent inclure une limite
+paramètre dans le cadre de la valeur du type de média. Le corps du message est lui-même
+un élément de protocole et doit donc utiliser uniquement CRLF pour représenter la ligne
+pauses entre les parties du corps. Les parties du corps en plusieurs parties peuvent contenir du HTTP
+champs d'en-tête qui sont importants pour la signification de cette partie.
+
+3.7 Jetons de produit
+
+Les jetons de produit sont utilisés pour permettre aux applications communicantes de
+s'identifier via un simple token produit, avec un optionnel
+barre oblique et indicateur de version. La plupart des champs utilisant également des jetons de produit
+permettre aux sous-produits qui constituent une partie importante de l'application de
+
+
+
+Berners-Lee et coll. Informationnel [Page 20]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+être répertoriés, séparés par des espaces. Par convention, les produits sont
+classés par ordre d'importance pour l'identification des
+application.
+
+produit = jeton ["/" version-produit]
+version du produit = jeton
+
+Exemples:
+
+Agent utilisateur : CERN-LineMode/2.15 libwww/2.17b3
+
+Serveur : Apache/0.8.4
+
+Les jetons de produit doivent être courts et précis : utilisez-les pour
+la publicité ou d'autres informations non essentielles sont explicitement
+interdit. Bien que n'importe quel caractère symbolique puisse apparaître dans un produit-
+version, ce jeton ne doit être utilisé que pour un identifiant de version
+(c'est-à-dire que les versions successives du même produit ne devraient différer que par
+la partie version du produit de la valeur du produit).
+
+4. Message HTTP
+
+4.1 Types de messages
+
+Les messages HTTP sont constitués de requêtes du client vers le serveur et de réponses
+du serveur au client.
+
+Message HTTP = Simple-Request ; Messages HTTP/0.9
+| Réponse simple
+| Demande complète ; Messages HTTP/1.0
+| Réponse complète
+
+Full-Request et Full-Response utilisent le format de message générique de RFC
+822 [7] pour les entités cédantes. Les deux messages peuvent inclure des informations facultatives
+des champs d'en-tête (également appelés « en-têtes ») et un corps d'entité. Le
+le corps de l'entité est séparé des en-têtes par une ligne nulle (c'est-à-dire un
+ligne sans rien précédant le CRLF).
+
+Demande complète = Ligne de demande ; Article 5.1
+*( En-tête général ; Section 4.3
+| En-tête de requête ; Article 5.2
+| En-tête d'entité ) ; Article 7.1
+CRLF
+[ Entité-Corps ] ; Article 7.2
+
+Réponse complète = Ligne d'état ; Article 6.1
+*( En-tête général ; Section 4.3
+| En-tête de réponse ; Article 6.2
+
+
+
+Berners-Lee, et al. Informationnel [Page 21]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+| En-tête d'entité ) ; Article 7.1
+CRLF
+[ Entité-Corps ] ; Article 7.2
+
+Simple-Request et Simple-Response ne permettent l'utilisation d'aucun en-tête
+informations et sont limités à une seule méthode de requête (GET).
+
+Simple-Request = "GET" SP Demande-URI CRLF
+
+Réponse simple = [ Entité-Corps ]
+
+L'utilisation du format Simple-Request est déconseillée car elle empêche
+le serveur d'identifier le type de média de l'entité renvoyée.
+
+4.2 En-têtes de message
+
+Champs d'en-tête HTTP, qui incluent General-Header (Section 4.3),
+En-tête de requête (Section 5.2), En-tête de réponse (Section 6.2) et
+Les champs Entity-Header (Section 7.1), suivent le même format générique que
+celle donnée à la section 3.1 de la RFC 822 [7]. Chaque champ d'en-tête comprend
+d'un nom suivi immédiatement de deux points (":"), d'un simple espace (SP)
+caractère et la valeur du champ. Les noms de champs ne sont pas sensibles à la casse.
+Les champs d'en-tête peuvent être étendus sur plusieurs lignes en précédant chacune d'entre elles.
+ligne supplémentaire avec au moins un SP ou HT, bien que ce ne soit pas le cas
+recommandé.
+
+En-tête HTTP = nom de champ ":" [ valeur de champ ] CRLF
+
+nom du champ = jeton
+valeur du champ = *( contenu du champ | LWS )
+
+field-content = <les OCTET composant la valeur du champ
+et composé soit de *TEXTE, soit de combinaisons
+du jeton, des tspecials et de la chaîne entre guillemets>
+
+L'ordre dans lequel les champs d'en-tête sont reçus n'est pas significatif.
+Cependant, il est de « bonne pratique » d'envoyer d'abord les champs d'en-tête général,
+suivi des champs Request-Header ou Response-Header avant le
+Champs d’en-tête d’entité.
+
+Plusieurs champs d'en-tête HTTP avec le même nom de champ peuvent être présents
+dans un message si et seulement si la valeur entière du champ pour cet en-tête
+Le champ est défini comme une liste séparée par des virgules [c'est-à-dire #(valeurs)]. Il doit
+être possible de combiner les multiples champs d'en-tête en un seul "champ-
+nom : champ-valeur", sans changer la sémantique du
+message, en ajoutant chaque valeur de champ suivante à la première, chaque
+séparés par une virgule.
+
+
+
+
+Berners-Lee, et al. Informationnel [Page 22]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+4.3 Champs d'en-tête généraux
+
+Il existe quelques champs d'en-tête qui ont une applicabilité générale pour
+à la fois des messages de demande et de réponse, mais qui ne s'appliquent pas au
+entité transférée. Ces en-têtes s'appliquent uniquement au message
+en cours de transmission.
+
+En-tête général = Date ; Article 10.6
+| Pragme ; Article 10.12
+
+Les noms de champs d'en-tête généraux peuvent être étendus de manière fiable uniquement dans
+combinaison avec un changement dans la version du protocole. Cependant, nouveau ou
+les champs d'en-tête expérimentaux peuvent recevoir la sémantique des champs généraux
+champs d'en-tête si toutes les parties à la communication les reconnaissent pour
+être des champs d'en-tête généraux. Les champs d'en-tête non reconnus sont traités comme
+Champs d’en-tête d’entité.
+
+5. Demande
+
+Un message de requête d'un client à un serveur comprend, dans le
+première ligne de ce message, la méthode à appliquer à la ressource,
+l'identifiant de la ressource et la version du protocole utilisée. Pour
+rétrocompatibilité avec le protocole HTTP/0.9 plus limité,
+il existe deux formats valides pour une requête HTTP :
+
+Demande = Demande simple | Demande complète
+
+Simple-Request = "GET" SP Demande-URI CRLF
+
+Demande complète = Ligne de demande ; Article 5.1
+*( En-tête général ; Section 4.3
+| En-tête de requête ; Article 5.2
+| En-tête d'entité ) ; Article 7.1
+CRLF
+[ Entité-Corps ] ; Article 7.2
+
+Si un serveur HTTP/1.0 reçoit une Simple-Request, il doit répondre avec
+une réponse simple HTTP/0.9. Un client HTTP/1.0 capable de recevoir
+une réponse complète ne doit jamais générer une demande simple.
+
+5.1 Ligne de demande
+
+La Request-Line commence par un jeton de méthode, suivi du
+Request-URI et la version du protocole, et se terminant par CRLF. Le
+les éléments sont séparés par des caractères SP. Aucun CR ou LF n'est autorisé
+sauf dans la séquence CRLF finale.
+
+Request-Line = Méthode SP Request-URI SP HTTP-Version CRLF
+
+
+
+Berners-Lee et coll. Informationnel [Page 23]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+Notez que la différence entre une Simple-Request et la Request-
+La ligne d'une Full-Request est la présence du champ HTTP-Version et
+la disponibilité de méthodes autres que GET.
+
+5.1.1 Méthode
+
+Le jeton Méthode indique la méthode à effectuer sur la ressource
+identifié par le Request-URI. La méthode est sensible à la casse.
+
+Méthode = "GET" ; Article 8.1
+| "TÊTE" ; Article 8.2
+| "POSTE" ; Article 8.3
+| méthode d'extension
+
+méthode d'extension = jeton
+
+La liste des méthodes acceptables par une ressource spécifique peut changer
+dynamiquement ; le client est averti via le code retour du
+réponse si une méthode n’est pas autorisée sur une ressource. Les serveurs devraient
+renvoie le code d'état 501 (non implémenté) si la méthode est
+méconnus ou non mis en œuvre.
+
+Les méthodes couramment utilisées par les applications HTTP/1.0 sont entièrement définies
+à la section 8.
+
+5.1.2 URI de requête
+
+Le Request-URI est un identifiant de ressource uniforme (section 3.2) et
+identifie la ressource sur laquelle appliquer la demande.
+
+URI de requête = URI absolu | chemin_abs
+
+Les deux options pour Request-URI dépendent de la nature du
+demande.
+
+Le formulaire AbsoluteURI n'est autorisé que lorsque la demande est effectuée
+à un mandataire. Le mandataire est prié de transmettre la demande et de retourner
+la réponse. Si la requête est GET ou HEAD et qu'une réponse préalable est
+mis en cache, le proxy peut utiliser le message mis en cache s'il transmet un message
+restrictions dans le champ d’en-tête Expires. Notez que le proxy peut
+transmettre la requête à un autre proxy ou directement au serveur
+spécifié par l'URI absolu. Afin d'éviter les boucles de requêtes, un
+le proxy doit être capable de reconnaître tous ses noms de serveur, y compris
+tous les alias, variantes locales et adresse IP numérique. Un exemple
+La ligne de demande serait :
+
+OBTENIR http://www.w3.org/pub/WWW/TheProject.html HTTP/1.0
+
+
+
+
+Berners-Lee et al. Informationnel [Page 24]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+La forme la plus courante de Request-URI est celle utilisée pour identifier un
+ressource sur un serveur ou une passerelle d’origine. Dans ce cas, seul le
+le chemin absolu de l'URI est transmis (voir Section 3.2.1,
+chemin_abs). Par exemple, un client souhaitant récupérer la ressource
+ci-dessus directement depuis le serveur d'origine créerait une connexion TCP
+au port 80 de l'hébergeur "www.w3.org" et envoyez la ligne :
+
+OBTENIR /pub/WWW/TheProject.html HTTP/1.0
+
+suivi du reste de la demande complète. Notez que l'absolu
+le chemin ne peut pas être vide ; si aucun n'est présent dans l'URI d'origine, il doit
+être donné sous la forme "/" (la racine du serveur).
+
+Le Request-URI est transmis sous forme de chaîne codée, où certains
+les caractères peuvent être échappés en utilisant le codage "% HEX HEX" défini par
+RFC1738 [4]. Le serveur d'origine doit décoder le Request-URI afin
+pour bien interpréter la demande.
+
+5.2 Champs d'en-tête de demande
+
+Les champs d'en-tête de la demande permettent au client de transmettre des
+informations sur la demande et sur le client lui-même, au
+serveur. Ces champs agissent comme des modificateurs de requête, avec une sémantique
+équivalent aux paramètres d'une méthode de langage de programmation
+(procédure) invocation.
+
+En-tête de demande = Autorisation ; Article 10.2
+| Depuis ; Article 10.8
+| Si-Modifié-Depuis ; Article 10.9
+| Référent ; Article 10.13
+| Agent utilisateur ; Article 10.15
+
+Les noms de champs Request-Header peuvent être étendus de manière fiable uniquement dans
+combinaison avec un changement dans la version du protocole. Cependant, nouveau ou
+les champs d'en-tête expérimentaux peuvent recevoir la sémantique de la requête
+champs d'en-tête si toutes les parties à la communication les reconnaissent pour
+être des champs d’en-tête de demande. Les champs d'en-tête non reconnus sont traités comme
+Champs d’en-tête d’entité.
+
+6. Réponse
+
+Après avoir reçu et interprété un message de requête, un serveur répond
+sous la forme d'un message de réponse HTTP.
+
+Réponse = Réponse simple | Réponse complète
+
+Réponse simple = [ Entité-Corps ]
+
+
+
+
+Berners-Lee et coll. Informationnel [Page 25]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+Réponse complète = Ligne d'état ; Article 6.1
+*( En-tête général ; Section 4.3
+| En-tête de réponse ; Article 6.2
+| En-tête d'entité ) ; Article 7.1
+CRLF
+[ Entité-Corps ] ; Article 7.2
+
+Une réponse simple ne doit être envoyée qu'en réponse à un HTTP/0.9
+Simple-Request ou si le serveur ne prend en charge que les requêtes plus limitées
+Protocole HTTP/0.9. Si un client envoie une requête complète HTTP/1.0 et
+reçoit une réponse qui ne commence pas par une Status-Line, elle devrait
+supposez que la réponse est une réponse simple et analysez-la
+par conséquent. Notez que la réponse simple se compose uniquement du
+corps de l’entité et se termine lorsque le serveur ferme la connexion.
+
+6.1 Ligne d'état
+
+La première ligne d'un message de réponse complète est la ligne d'état,
+composé de la version du protocole suivie d'un code d'état numérique
+et sa phrase textuelle associée, chaque élément étant séparé par SP
+personnages. Aucun CR ou LF n'est autorisé sauf dans la séquence CRLF finale.
+
+Ligne d'état = Version HTTP SP Code d'état SP Raison-Phrase CRLF
+
+Comme une ligne d'état commence toujours par la version du protocole et
+code d'état
+
+"HTTP/" 1*CHIFFRE "." 1 * CHIFFRE SP 3 CHIFFRES SP
+
+(par exemple, " HTTP/1.0 200 "), la présence de cette expression est
+suffisant pour différencier une réponse complète d’une réponse simple.
+Bien que le format de réponse simple puisse permettre à une telle expression de
+se produisent au début du corps d'une entité, et provoquent ainsi un
+mauvaise interprétation du message s'il a été donné en réponse à un
+Full-Request, la plupart des serveurs HTTP/0.9 sont limités aux réponses de type
+"text/html" et ne générerait donc jamais une telle réponse.
+
+6.1.1 Code d'état et phrase de raison
+
+L'élément Status-Code est un code de résultat entier à 3 chiffres du
+tenter de comprendre et de satisfaire la demande. La phrase de raison est
+destiné à donner une brève description textuelle du Status-Code. Le
+Le code d'état est destiné à être utilisé par les automates et la phrase de raison est
+destiné à l'utilisateur humain. Le client n'est pas tenu d'examiner ou
+afficher la phrase-raison.
+
+
+
+
+
+
+Berners-Lee et coll. Informationnel [Page 26]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+Le premier chiffre du Status-Code définit la classe de réponse. Le
+les deux derniers chiffres n'ont aucun rôle de catégorisation. Il y en a 5
+valeurs pour le premier chiffre :
+
+o 1xx : Informatif - Non utilisé, mais réservé pour une utilisation future
+
+o 2xx : Succès - L'action a été reçue avec succès,
+compris et accepté.
+
+o 3xx : Redirection – Des mesures supplémentaires doivent être prises afin de
+compléter la demande
+
+o 4xx : Erreur client - La requête contient une mauvaise syntaxe ou ne peut pas
+être comblé
+
+o 5xx : Erreur du serveur - Le serveur n'a apparemment pas réussi à remplir une
+demande valide
+
+Les valeurs individuelles des codes d'état numériques définis pour
+HTTP/1.0 et un exemple d'ensemble de phrases de raison correspondantes sont
+présenté ci-dessous. Les phrases de raison répertoriées ici sont uniquement recommandées
+-- ils peuvent être remplacés par des équivalents locaux sans affecter la
+protocole. Ces codes sont entièrement définis à la section 9.
+
+Code d'état = "200" ; D'ACCORD
+| "201" ; Créé
+| "202" ; Accepté
+| "204" ; Pas de contenu
+| "301" ; Déménagé définitivement
+| "302" ; Déplacé temporairement
+| "304" ; Non modifié
+| "400" ; Mauvaise demande
+| "401" ; Non autorisé
+| "403" ; Interdit
+| "404" ; Pas trouvé
+| "500" ; Erreur interne du serveur
+| "501" ; Pas mis en œuvre
+| "502" ; Mauvaise passerelle
+| "503" ; service non disponible
+| code d'extension
+
+code d'extension = 3DIGIT
+
+Raison-Phrase = *<TEXTE, à l'exclusion de CR, LF>
+
+Les codes d'état HTTP sont extensibles, mais les codes ci-dessus sont les seuls
+celles généralement reconnues dans la pratique actuelle. Les applications HTTP sont
+pas besoin de comprendre la signification de tous les statuts enregistrés
+
+
+
+Berners-Lee et al. Informationnel [Page 27]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+codes, même si une telle compréhension est évidemment souhaitable. Cependant,
+les applications doivent comprendre la classe de tout code de statut, comme
+indiqué par le premier chiffre et traiter toute réponse non reconnue comme
+étant équivalent au code d'état x00 de cette classe, avec le
+exception selon laquelle une réponse non reconnue ne doit pas être mise en cache. Pour
+Par exemple, si un code d'état non reconnu de 431 est reçu par le
+client, il peut supposer en toute sécurité qu'il y a eu un problème avec son
+demander et traiter la réponse comme si elle avait reçu un statut 400
+code. Dans de tels cas, les agents utilisateurs doivent présenter à l'utilisateur le
+entité renvoyée avec la réponse, puisque cette entité est susceptible de
+inclure des informations lisibles par l'homme qui expliqueront le phénomène inhabituel
+statut.
+
+6.2 Champs d'en-tête de réponse
+
+Les champs d'en-tête de réponse permettent au serveur de transmettre des
+informations sur la réponse qui ne peuvent pas être placées dans le Status-
+Doubler. Ces champs d'en-tête donnent des informations sur le serveur et sur
+un accès supplémentaire à la ressource identifiée par le Request-URI.
+
+En-tête de réponse = Emplacement ; Article 10.11
+| Serveur ; Article 10.14
+| WWW-Authentifier ; Article 10.16
+
+Les noms de champs Response-Header peuvent être étendus de manière fiable uniquement dans
+combinaison avec un changement dans la version du protocole. Cependant, nouveau ou
+les champs d'en-tête expérimentaux peuvent recevoir la sémantique de la réponse
+champs d'en-tête si toutes les parties à la communication les reconnaissent pour
+être des champs d’en-tête de réponse. Les champs d'en-tête non reconnus sont traités comme
+Champs d’en-tête d’entité.
+
+7. Entité
+
+Les messages de demande complète et de réponse complète peuvent transférer une entité au sein de
+quelques demandes et réponses. Une entité se compose de Entity-Header
+des champs et (généralement) un Entité-Corps. Dans cette section, l'expéditeur et
+destinataire fait référence soit au client, soit au serveur, selon qui
+envoie et qui reçoit l'entité.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Berners-Lee et al. Informationnel [Page 28]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+7.1 Champs d'en-tête d'entité
+
+Les champs Entity-Header définissent des métainformations facultatives sur le
+Entité-Corps ou, si aucun organisme n'est présent, sur la ressource identifiée
+par la demande.
+
+En-tête d'entité = Autoriser ; Article 10.1
+| Encodage de contenu ; Article 10.3
+| Contenu-Longueur ; Article 10.4
+| Type de contenu ; Article 10.5
+| Expire ; Article 10.7
+| Dernière modification ; Article 10.10
+| en-tête d'extension
+
+en-tête d'extension = en-tête HTTP
+
+Le mécanisme d'en-tête d'extension autorise des champs Entity-Header supplémentaires
+à définir sans changer le protocole, mais ces champs ne peuvent pas
+être supposé reconnaissable par le destinataire. En-tête non reconnu
+les champs doivent être ignorés par le destinataire et transmis par les proxys.
+
+7.2 Corps de l'entité
+
+Le corps de l'entité (le cas échéant) envoyé avec une requête ou une réponse HTTP est en
+un format et un codage définis par les champs Entity-Header.
+
+Entité-Corps = *OCTET
+
+Un corps d'entité est inclus dans un message de demande uniquement lorsque le
+La méthode de requête en appelle un. La présence d'un organisme d'entité dans un
+la requête est signalée par l'inclusion d'un champ d'en-tête Content-Length
+dans les en-têtes du message de demande. Requêtes HTTP/1.0 contenant un
+Le corps de l'entité doit inclure un champ d'en-tête Content-Length valide.
+
+Pour les messages de réponse, qu'un corps d'entité soit inclus ou non avec
+un message dépend à la fois de la méthode de requête et de la réponse
+code. Toutes les réponses à la méthode de requête HEAD ne doivent pas inclure de
+body, même si la présence de champs d'en-tête d'entité peut conduire à
+croire qu'ils le font. Tous les 1xx (informatif), 204 (sans contenu) et
+Les réponses 304 (non modifiées) ne doivent pas inclure de corps. Tous les autres
+les réponses doivent inclure un corps d'entité ou un en-tête Content-Length
+champ défini avec une valeur de zéro (0).
+
+7.2.1 Type
+
+Lorsqu'une entité-corps est incluse dans un message, le type de données de cette
+Le corps est déterminé via les champs d'en-tête Content-Type et Content-
+Codage. Ceux-ci définissent un modèle de codage ordonné à deux couches :
+
+
+
+Berners-Lee et coll. Informationnel [Page 29]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+corps-d'entité := Content-Encoding( Content-Type( data ) )
+
+Un Content-Type spécifie le type de média des données sous-jacentes. UN
+Content-Encoding peut être utilisé pour indiquer tout contenu supplémentaire
+codage appliqué au type, généralement à des fins de données
+compression, qui est une propriété de la ressource demandée. Le
+La valeur par défaut pour l'encodage du contenu est aucun (c'est-à-dire l'identité
+fonction).
+
+Tout message HTTP/1.0 contenant un corps d'entité doit inclure un
+Champ d’en-tête Content-Type définissant le type de média de ce corps. Si
+et seulement si le type de média n'est pas donné par un en-tête Content-Type, comme
+C'est le cas des messages à réponse simple, le destinataire peut tenter
+deviner le type de média en inspectant son contenu et/ou son nom
+extension(s) de l’URL utilisée pour identifier la ressource. Si les médias
+le type reste inconnu, le destinataire doit le traiter comme type
+"application/flux d'octets".
+
+7.2.2 Longueur
+
+Lorsqu'une Entité-Corps est incluse dans un message, la longueur de cette Entité-Corps est incluse dans un message.
+Le corps peut être déterminé de deux manières. Si un en-tête Content-Length
+est présent, sa valeur en octets représente la longueur du
+Entité-Corps. Sinon, la longueur du corps est déterminée par la fermeture
+de la connexion par le serveur.
+
+La fermeture de la connexion ne peut pas être utilisée pour indiquer la fin d'une
+corps de la requête, car il ne laisse aucune possibilité au serveur d'envoyer
+retourner une réponse. Par conséquent, les requêtes HTTP/1.0 contenant une entité
+Le corps doit inclure un champ d’en-tête Content-Length valide. Si une demande
+contient un corps d'entité et Content-Length n'est pas spécifié, et le
+le serveur ne reconnaît pas ou ne peut pas calculer la longueur à partir d'autres
+champs, le serveur doit envoyer une réponse 400 (mauvaise demande).
+
+Remarque : Certains serveurs plus anciens fournissent une longueur de contenu non valide lorsque
+envoyer dynamiquement un document contenant des inclusions côté serveur
+inséré dans le flux de données. Il faut souligner que cela
+ne sera pas toléré par les futures versions de HTTP. À moins que le
+le client sait qu'il reçoit une réponse d'un client conforme
+serveur, cela ne devrait pas dépendre de la valeur Content-Length étant
+correct.
+
+8. Définitions des méthodes
+
+L'ensemble des méthodes courantes pour HTTP/1.0 est défini ci-dessous. Bien que
+cet ensemble peut être étendu, on ne peut pas supposer que des méthodes supplémentaires
+partagent la même sémantique pour les clients et les serveurs étendus séparément.
+
+
+
+
+Berners-Lee et al. Informationnel [Page 30]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+8.1 OBTENIR
+
+La méthode GET consiste à récupérer n'importe quelle information (sous la forme d'un
+entité) est identifiée par le Request-URI. Si le Request-URI fait référence
+à un processus de production de données, ce sont les données produites qui doivent être
+renvoyé en tant qu'entité dans la réponse et non en tant que texte source du
+processus, à moins que ce texte ne soit le résultat du processus.
+
+La sémantique de la méthode GET se transforme en « GET conditionnel » si le
+Le message de demande inclut un champ d’en-tête If-Modified-Since. UN
+La méthode GET conditionnelle demande que la ressource identifiée soit
+transféré que s'il a été modifié depuis la date indiquée par le
+En-tête If-Modified-Since, comme décrit à la section 10.9. Le
+La méthode GET conditionnelle est destinée à réduire l'utilisation du réseau en
+permettant aux entités mises en cache d'être actualisées sans nécessiter plusieurs
+demandes ou transférer des données inutiles.
+
+8.2 TÊTE
+
+La méthode HEAD est identique à GET sauf que le serveur ne doit pas
+renvoie n’importe quel corps d’entité dans la réponse. Les métainformations contenues
+dans les en-têtes HTTP en réponse à une requête HEAD doivent être identiques
+aux informations envoyées en réponse à une requête GET. Cette méthode peut
+être utilisé pour obtenir des métainformations sur la ressource identifiée
+par le Request-URI sans transférer l’Entity-Body lui-même. Ce
+La méthode est souvent utilisée pour tester la validité des liens hypertextes,
+accessibilité et modification récente.
+
+Il n'existe pas de requête "HEAD conditionnelle" analogue à la requête conditionnelle
+OBTENIR. Si un champ d'en-tête If-Modified-Since est inclus avec un HEAD
+demande, elle doit être ignorée.
+
+8.3 PUBLIER
+
+La méthode POST est utilisée pour demander au serveur de destination d'accepter
+l'entité incluse dans la demande en tant que nouveau subordonné du
+ressource identifiée par le Request-URI dans la Request-Line. LE POSTE est
+conçu pour permettre une méthode uniforme pour couvrir les fonctions suivantes :
+
+o Annotation des ressources existantes ;
+
+o Publication d'un message sur un babillard électronique, un groupe de discussion, une liste de diffusion,
+ou groupe d'articles similaire ;
+
+o Fournir un bloc de données, tel que le résultat de la soumission d'un
+formulaire [3], à un processus de traitement de données ;
+
+o Extension d'une base de données via une opération d'ajout.
+
+
+
+Berners-Lee et coll. Informationnel [Page 31]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+La fonction réelle exécutée par la méthode POST est déterminée par le
+serveur et dépend généralement du Request-URI. L'entité publiée
+est subordonné à cet URI de la même manière qu'un fichier est subordonné
+à un répertoire le contenant, un article d'actualité est subordonné à un
+groupe de discussion sur lequel il est publié, ou un enregistrement est subordonné à un
+base de données.
+
+Un POST réussi ne nécessite pas que l'entité soit créée en tant que
+ressource sur le serveur d'origine ou rendue accessible pour de futures
+référence. Autrement dit, l'action effectuée par la méthode POST pourrait ne pas
+aboutissent à une ressource qui peut être identifiée par un URI. Dans ce cas,
+soit 200 (ok) ou 204 (pas de contenu) est la réponse appropriée
+statut, selon que la réponse inclut ou non une entité
+qui décrit le résultat.
+
+Si une ressource a été créée sur le serveur d'origine, la réponse
+doit être 201 (créé) et contenir une entité (de préférence de type
+"text/html") qui décrit le statut de la demande et fait référence à
+la nouvelle ressource.
+
+Une longueur de contenu valide est requise sur toutes les requêtes HTTP/1.0 POST. Un
+Le serveur HTTP/1.0 doit répondre avec un message 400 (mauvaise requête) s'il
+ne peut pas déterminer la longueur du contenu du message de demande.
+
+Les applications ne doivent pas mettre en cache les réponses à une requête POST car le
+l'application n'a aucun moyen de savoir que le serveur renverra un
+réponse équivalente sur une demande future.
+
+9. Définitions des codes d'état
+
+Chaque code de statut est décrit ci-dessous, y compris une description de celui-ci.
+méthode(s) qu'il peut suivre et toute métainformation requise dans le
+réponse.
+
+9.1 Informations 1xx
+
+Cette classe de code d'état indique une réponse provisoire,
+composé uniquement de la Status-Line et des en-têtes facultatifs, et est
+terminé par une ligne vide. HTTP/1.0 ne définit aucun statut 1xx
+codes et ils ne constituent pas une réponse valide à une requête HTTP/1.0.
+Cependant, ils peuvent être utiles pour des applications expérimentales
+en dehors du cadre de cette spécification.
+
+9.2 2xx réussi
+
+Cette classe de code d'état indique que la demande du client a été
+reçu, compris et accepté avec succès.
+
+
+
+
+Berners-Lee et al. Informationnel [Page 32]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+200 OK
+
+La demande a abouti. Les informations renvoyées avec le
+la réponse dépend de la méthode utilisée dans la demande, comme suit :
+
+GET une entité correspondant à la ressource demandée est envoyée
+dans la réponse ;
+
+HEAD la réponse ne doit contenir que les informations d'en-tête et
+pas d'Entité-Corps ;
+
+POST une entité décrivant ou contenant le résultat de l'action.
+
+201 Créé
+
+La demande a été satisfaite et a donné lieu à la création d'une nouvelle ressource.
+créé. La ressource nouvellement créée peut être référencée par le ou les URI
+renvoyé dans l’entité de la réponse. Le serveur d'origine doit
+créez la ressource avant d'utiliser ce code d'état. Si l'action
+ne peut être effectué immédiatement, le serveur doit inclure dans le
+corps de la réponse, une description du moment où la ressource sera disponible ;
+sinon, le serveur devrait répondre par 202 (accepté).
+
+Parmi les méthodes définies par cette spécification, seul POST peut créer un
+Ressource.
+
+202 Accepté
+
+La demande a été acceptée pour traitement, mais le traitement
+n’a pas été achevé. La demande peut éventuellement être ou non
+donné suite, car il peut être refusé lorsque le traitement prend réellement
+lieu. Il n'existe aucune possibilité de renvoyer un code d'état à partir d'un
+opération asynchrone comme celle-ci.
+
+La réponse du 202 est intentionnellement sans engagement. Son but est de
+permettre à un serveur d'accepter une demande pour un autre processus (peut-être
+un processus orienté batch qui n'est exécuté qu'une fois par jour) sans
+exigeant que la connexion de l'agent utilisateur au serveur persiste
+jusqu'à ce que le processus soit terminé. L'entité est revenue avec ceci
+la réponse doit inclure une indication de l'état actuel de la demande
+état et soit un pointeur vers un moniteur d'état, soit une estimation de
+moment où l'utilisateur peut s'attendre à ce que la demande soit satisfaite.
+
+204 Aucun contenu
+
+Le serveur a répondu à la demande mais il n'y a pas de nouveau
+informations à renvoyer. Si le client est un agent utilisateur, il doit
+ne pas modifier la vue du document par rapport à celle qui a provoqué la demande
+
+
+
+Berners-Lee, et al. Informationnel [Page 33]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+être généré. Cette réponse est principalement destinée à permettre la saisie
+pour que des scripts ou d'autres actions aient lieu sans provoquer de changement
+à la vue de document active de l'agent utilisateur. La réponse peut inclure
+de nouvelles métainformations sous forme d'en-têtes d'entité, qui devraient
+s'applique au document actuellement dans la vue active de l'agent utilisateur.
+
+9.3 Redirection 3xx
+
+Cette classe de code d'état indique qu'une action supplémentaire doit être
+prises par l'agent utilisateur afin de répondre à la demande. L'action
+requis peut être effectué par l'agent utilisateur sans interaction
+avec l'utilisateur si et seulement si la méthode utilisée dans la suite
+la requête est GET ou HEAD. Un agent utilisateur ne devrait jamais automatiquement
+rediriger une demande plus de 5 fois, car ces redirections sont généralement
+indique une boucle infinie.
+
+300 choix multiples
+
+Ce code réponse n'est pas directement utilisé par les applications HTTP/1.0,
+mais sert de valeur par défaut pour interpréter la classe 3xx de
+réponses.
+
+La ressource demandée est disponible à un ou plusieurs emplacements.
+Sauf s'il s'agissait d'une requête HEAD, la réponse doit inclure une entité
+contenant une liste des caractéristiques et des emplacements des ressources de
+lequel l'utilisateur ou l'agent utilisateur peut choisir celui le plus approprié.
+Si le serveur a un choix préféré, il doit inclure l'URL dans
+un champ Localisation ; les agents utilisateurs peuvent utiliser cette valeur de champ pour
+redirection automatique.
+
+301 Déménagé Définitivement
+
+La ressource demandée s'est vu attribuer une nouvelle URL permanente et
+toute référence future à cette ressource doit être effectuée en utilisant cette
+URL. Les clients dotés de capacités d'édition de liens devraient automatiquement
+relier les références au Request-URI à la nouvelle référence renvoyée
+par le serveur, lorsque cela est possible.
+
+La nouvelle URL doit être indiquée par le champ Emplacement dans la réponse.
+Sauf s'il s'agissait d'une requête HEAD, l'Entité-Corps de la réponse
+doit contenir une courte note avec un lien hypertexte vers la nouvelle URL.
+
+Si le code d'état 301 est reçu en réponse à une demande utilisant
+la méthode POST, l'agent utilisateur ne doit pas rediriger automatiquement le
+demande à moins qu'elle puisse être confirmée par l'utilisateur, car cela pourrait
+modifier les conditions dans lesquelles la demande a été émise.
+
+
+
+
+
+Berners-Lee et al. Informationnel [Page 34]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+Remarque : lors de la redirection automatique d'une requête POST après
+recevant un code d'état 301, certains agents utilisateurs existants
+changez-le par erreur en une requête GET.
+
+302 Déplacé temporairement
+
+La ressource demandée réside temporairement sous une URL différente.
+La redirection pouvant être modifiée à l'occasion, le client doit
+continuez à utiliser le Request-URI pour les demandes futures.
+
+L'URL doit être indiquée par le champ Emplacement dans la réponse. Sauf si
+c'était une requête HEAD, l'Entité-Corps de la réponse doit
+contenir une courte note avec un lien hypertexte vers le ou les nouveaux URI.
+
+Si le code d'état 302 est reçu en réponse à une demande utilisant
+la méthode POST, l'agent utilisateur ne doit pas rediriger automatiquement le
+demande à moins qu'elle puisse être confirmée par l'utilisateur, car cela pourrait
+modifier les conditions dans lesquelles la demande a été émise.
+
+Remarque : lors de la redirection automatique d'une requête POST après
+recevant un code d'état 302, certains agents utilisateurs existants
+changez-le par erreur en une requête GET.
+
+304 Non modifié
+
+Si le client a effectué une requête GET conditionnelle et que l'accès est
+autorisé, mais le document n'a pas été modifié depuis la date et
+heure spécifiée dans le champ If-Modified-Since, le serveur doit
+répondre avec ce code d'état et ne pas envoyer d'entité-corps au
+client. Les champs d'en-tête contenus dans la réponse ne doivent inclure que
+informations pertinentes pour les gestionnaires de cache ou qui peuvent avoir
+modifié indépendamment de la date de dernière modification de l'entité. Exemples
+Les champs d'en-tête pertinents incluent : Date, Serveur et Expire. UN
+le cache doit mettre à jour son entité mise en cache pour refléter tout nouveau champ
+valeurs données dans la réponse 304.
+
+9.4 Erreur client 4xx
+
+La classe 4xx de code d'état est destinée aux cas dans lesquels le
+le client semble s'être trompé. Si le client n'a pas complété le
+demande lorsqu'un code 4xx est reçu, il doit immédiatement cesser
+envoyer des données au serveur. Sauf en réponse à une requête HEAD,
+le serveur doit inclure une entité contenant une explication du
+situation d'erreur et s'il s'agit d'une situation temporaire ou permanente
+condition. Ces codes d'état sont applicables à toute méthode de demande.
+
+
+
+
+
+
+Berners-Lee et coll. Informationnel [Page 35]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+Remarque : Si le client envoie des données, les implémentations de serveur sur TCP
+veillera à ce que le client accuse réception
+du ou des paquets contenant la réponse avant de fermer le
+connexion d'entrée. Si le client continue d'envoyer des données au
+serveur après la fermeture, le contrôleur du serveur enverra une réinitialisation
+paquet au client, ce qui peut effacer les informations non reconnues du client
+tampons d'entrée avant qu'ils puissent être lus et interprétés par HTTP
+application.
+
+400 requêtes incorrectes
+
+La requête n'a pas pu être comprise par le serveur en raison d'un message mal formé.
+syntaxe. Le client ne doit pas répéter la demande sans
+modifications.
+
+401 Non autorisé
+
+La demande nécessite une authentification de l'utilisateur. La réponse doit inclure
+un champ d'en-tête WWW-Authenticate (Section 10.16) contenant un
+défi applicable à la ressource demandée. Le client peut
+répétez la demande avec un champ d'en-tête Autorisation approprié
+(Section 10.2). Si la demande comprenait déjà une autorisation
+informations d'identification, la réponse 401 indique que l'autorisation a été
+été refusée pour ces titres de compétences. Si la réponse 401 contient
+le même défi que la réponse précédente, et l'agent utilisateur a
+déjà tenté une authentification au moins une fois, l'utilisateur
+il convient de présenter l'entité qui a été indiquée dans la réponse,
+puisque cette entité peut inclure des informations de diagnostic pertinentes. HTTP
+l'authentification d'accès est expliquée à la section 11.
+
+403 Interdit
+
+Le serveur a compris la demande, mais refuse d'y répondre.
+L'autorisation n'aidera pas et la demande ne doit pas être répétée.
+Si la méthode de requête n'était pas HEAD et que le serveur souhaite effectuer
+public pourquoi la demande n'a pas été satisfaite, il doit décrire
+le motif du refus dans l'organisme de l'entité. Ce code d'état est
+couramment utilisé lorsque le serveur ne souhaite pas révéler exactement pourquoi
+la demande a été refusée, ou lorsqu'aucune autre réponse n'est reçue
+en vigueur.
+
+404 introuvable
+
+Le serveur n'a rien trouvé correspondant à l'URI de la demande. Non
+une indication est donnée pour savoir si la condition est temporaire ou
+permanent. Si le serveur ne souhaite pas rendre ces informations
+à la disposition du client, le code d'état 403 (interdit) peut être
+utilisé à la place.
+
+
+
+Berners-Lee et al. Informationnel [Page 36]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+9.5 Erreur de serveur 5xx
+
+Les codes d'état de réponse commençant par le chiffre « 5 » indiquent les cas dans
+dont le serveur est conscient qu'il s'est trompé ou qu'il est incapable de le faire
+exécuter la demande. Si le client n'a pas complété la demande
+lorsqu'un code 5xx est reçu, il doit immédiatement cesser d'envoyer des données
+au serveur. Sauf en répondant à une requête HEAD, le serveur
+doit inclure une entité contenant une explication de l'erreur
+situation, et s’il s’agit d’une condition temporaire ou permanente.
+Ces codes de réponse sont applicables à toute méthode de demande et là
+il n'y a pas de champs d'en-tête obligatoires.
+
+500 Erreur de serveur interne
+
+Le serveur a rencontré une condition inattendue qui l'a empêché
+de répondre à la demande.
+
+501 Non mis en œuvre
+
+Le serveur ne prend pas en charge les fonctionnalités requises pour remplir
+la demande. C'est la réponse appropriée lorsque le serveur le fait
+ne reconnaît pas la méthode de requête et n'est pas capable de prendre en charge
+pour n'importe quelle ressource.
+
+502 Mauvaise passerelle
+
+Le serveur, alors qu'il agissait comme passerelle ou proxy, a reçu un message non valide.
+réponse du serveur en amont auquel il a accédé en tentant de
+remplir la demande.
+
+503 Service Indisponible
+
+Le serveur est actuellement incapable de traiter la demande en raison d'un
+surcharge temporaire ou maintenance du serveur. L'implication
+c'est qu'il s'agit d'une condition temporaire qui sera atténuée
+après un certain retard.
+
+Remarque : L'existence du code d'état 503 n'implique pas
+qu'un serveur doit l'utiliser lorsqu'il est surchargé. Quelques
+les serveurs peuvent souhaiter simplement refuser la connexion.
+
+10. Définitions des champs d'en-tête
+
+Cette section définit la syntaxe et la sémantique de tous les
+Champs d’en-tête HTTP/1.0. Pour les champs d'en-tête général et d'entité, les deux
+l'expéditeur et le destinataire font référence soit au client, soit au serveur,
+selon qui envoie et qui reçoit le message.
+
+
+
+
+Berners-Lee, et al. Informationnel [Page 37]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+10.1 Autoriser
+
+Le champ d'en-tête d'entité Autoriser répertorie l'ensemble des méthodes prises en charge par
+la ressource identifiée par le Request-URI. Le but de ce champ
+est strictement d'informer le destinataire des méthodes valides associées à
+la ressource. Le champ d’en-tête Autoriser n’est pas autorisé dans une requête
+en utilisant la méthode POST, et doit donc être ignoré s'il est reçu
+dans le cadre d'une entité POST.
+
+Autoriser = "Autoriser" ":" 1#méthode
+
+Exemple d'utilisation :
+
+Autoriser : GET, HEAD
+
+Ce champ ne peut pas empêcher un client d'essayer d'autres méthodes.
+Cependant, les indications données par la valeur du champ d'en-tête Autoriser doivent
+être suivi. L'ensemble réel des méthodes autorisées est défini par le
+serveur d'origine au moment de chaque requête.
+
+Un proxy ne doit pas modifier le champ d'en-tête Autoriser même s'il ne le fait pas.
+comprendre toutes les méthodes spécifiées, puisque l'agent utilisateur peut avoir
+d'autres moyens de communication avec le serveur d'origine.
+
+Le champ d'en-tête Autoriser n'indique pas quelles méthodes sont implémentées
+par le serveur.
+
+10.2 Autorisation
+
+Un agent utilisateur qui souhaite s'authentifier auprès d'un serveur...
+généralement, mais pas nécessairement, après avoir reçu une réponse 401 - peut faire l'affaire
+donc en incluant un champ d'en-tête de demande d'autorisation avec le
+demande. La valeur du champ Autorisation est constituée d'informations d'identification
+contenant les informations d'authentification de l'agent utilisateur pour le
+domaine de la ressource demandée.
+
+Autorisation = "Autorisation" ":" identifiants
+
+L'authentification d'accès HTTP est décrite à la section 11. Si une demande
+est authentifié et un domaine spécifié, les mêmes informations d'identification doivent
+être valable pour toutes les autres demandes dans ce domaine.
+
+Les réponses aux requêtes contenant un champ Autorisation ne sont pas
+pouvant être mis en cache.
+
+
+
+
+
+
+
+Berners-Lee et al. Informationnel [Page 38]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+10.3 Encodage du contenu
+
+Le champ d’en-tête d’entité Content-Encoding est utilisé comme modificateur du
+type de support. Lorsqu'elle est présente, sa valeur indique quel contenu supplémentaire
+le codage a été appliqué à la ressource, et donc quel décodage
+Un mécanisme doit être appliqué afin d'obtenir le type de média
+référencé par le champ d’en-tête Content-Type. Le codage de contenu est
+principalement utilisé pour permettre à un document d'être compressé sans perdre
+l'identité de son type de média sous-jacent.
+
+Content-Encoding = "Content-Encoding" ": : codage de contenu
+
+Les codages de contenu sont définis à la section 3.5. Un exemple de son utilisation est
+
+Encodage du contenu : x-gzip
+
+Le Content-Encoding est une caractéristique de la ressource identifiée
+par le Request-URI. Généralement, la ressource est stockée avec ceci
+encodage et n’est décodé qu’avant le rendu ou une utilisation analogue.
+
+10.4 Longueur du contenu
+
+Le champ d'en-tête d'entité Content-Length indique la taille du
+Entité-Corps, en nombre décimal d'octets, envoyé au destinataire ou,
+dans le cas de la méthode HEAD, la taille de l'Entité-Corps qui
+aurait été envoyé si la demande avait été un GET.
+
+Contenu-Longueur = "Contenu-Longueur" ":" 1*CHIFFRE
+
+Un exemple est
+
+Longueur du contenu : 3495
+
+Les candidatures doivent utiliser ce champ pour indiquer la taille du
+Entité-Corps à transférer, quel que soit le type de support du
+entité. Une valeur de champ Content-Length valide est requise pour tous
+Messages de requête HTTP/1.0 contenant un corps d'entité.
+
+Toute longueur de contenu supérieure ou égale à zéro est une valeur valide.
+La section 7.2.2 décrit comment déterminer la longueur d'une réponse
+corps de l’entité si une longueur de contenu n’est pas donnée.
+
+Remarque : La signification de ce champ est très différente de celle
+la définition correspondante dans MIME, où il s'agit d'un élément facultatif
+champ utilisé dans le type de contenu "message/corps-externe". Dans
+HTTP, il doit être utilisé chaque fois que la longueur de l'entité peut être
+déterminée avant d'être transférée.
+
+
+
+
+Berners-Lee et coll. Informationnel [Page 39]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+10.5 Type de contenu
+
+Le champ d'en-tête d'entité Content-Type indique le type de média du
+Entité-Corps envoyé au destinataire ou, dans le cas de la méthode HEAD,
+le type de média qui aurait été envoyé si la demande avait été un GET.
+
+Content-Type = "Content-Type" ":" type de média
+
+Les types de médias sont définis à la section 3.6. Un exemple de champ est
+
+Type de contenu : texte/html
+
+Discussion plus approfondie sur les méthodes permettant d'identifier le type de média d'un
+l’entité est fournie à la section 7.2.1.
+
+10.6 Dates
+
+Le champ d'en-tête général Date représente la date et l'heure auxquelles
+le message a été émis, ayant la même sémantique que orig-date dans
+RFC 822. La valeur du champ est une date HTTP, comme décrit dans la section
+3.3.
+
+Date = "Date" ":" Date HTTP
+
+Un exemple est
+
+Date : mardi 15 novembre 1994 08:12:31 GMT
+
+Si un message est reçu via une connexion directe avec l'agent utilisateur
+(dans le cas de requêtes) ou le serveur d'origine (dans le cas de
+réponses), alors la date peut être supposée être la date actuelle à
+l'extrémité réceptrice. Cependant, depuis cette date - comme le croient les
+origin - est important pour évaluer les réponses mises en cache, les serveurs d'origine
+doit toujours inclure un en-tête Date. Les clients ne doivent envoyer qu'une date
+champ d'en-tête dans les messages qui incluent un corps d'entité, comme dans le cas
+de la requête POST, et même dans ce cas, elle est facultative. Un message reçu
+qui n'a pas de champ d'en-tête Date doit en recevoir un par le
+destinataire si le message sera mis en cache par ce destinataire ou
+transité via un protocole qui nécessite une date.
+
+En théorie, la date devrait représenter le moment juste avant le
+l'entité est générée. En pratique, la date peut être générée à tout moment
+temps lors de l’origine du message sans affecter sa sémantique
+valeur.
+
+Remarque : Une version antérieure de ce document était incorrectement spécifiée
+que ce champ doit contenir la date de création du fichier ci-joint
+Entité-Corps. Ceci a été modifié pour refléter la réalité (et la bonne)
+
+
+
+Berners-Lee et al. Informationnel [Page 40]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+usage.
+
+10.7 Expire
+
+Le champ d'en-tête d'entité Expire donne la date/heure après laquelle le
+l’entité doit être considérée comme obsolète. Cela permet aux fournisseurs d'informations
+pour suggérer la volatilité de la ressource, ou une date après laquelle la
+les informations peuvent ne plus être valides. Les applications ne doivent pas mettre cela en cache
+entité au-delà de la date indiquée. La présence d'un champ Expire
+n'implique pas que la ressource d'origine changera ou cessera d'exister
+à, avant ou après cette heure. Cependant, les fournisseurs d'informations qui
+savoir ou même soupçonner qu'une ressource va changer d'ici une certaine date
+doit inclure un en-tête Expire avec cette date. Le format est un
+date et heure absolues telles que définies par HTTP-date dans la section 3.3.
+
+Expire = "Expire" ":" Date HTTP
+
+Un exemple de son utilisation est
+
+Expire : jeu. 1 décembre 1994 16:00:00 GMT
+
+Si la date indiquée est égale ou antérieure à la valeur de la date
+en-tête, le destinataire ne doit pas mettre en cache l'entité incluse. Si un
+La ressource est dynamique par nature, comme c'est le cas de nombreuses données.
+processus de production, les entités de cette ressource devraient recevoir un
+valeur d'expiration appropriée qui reflète ce dynamisme.
+
+Le champ Expire ne peut pas être utilisé pour forcer un agent utilisateur à actualiser son
+afficher ou recharger une ressource ; sa sémantique s'applique uniquement à la mise en cache
+mécanismes, et ces mécanismes n'ont besoin que de vérifier les ressources d'une ressource.
+statut d’expiration lorsqu’une nouvelle demande pour cette ressource est lancée.
+
+Les agents utilisateurs disposent souvent de mécanismes d'historique, tels que des boutons "Retour" et
+des listes d'historique, qui peuvent être utilisées pour réafficher une entité récupérée
+plus tôt dans une séance. Par défaut, le champ Expire ne s'applique pas à
+mécanismes historiques. Si l'entité est toujours en stockage, un historique
+le mécanisme devrait l'afficher même si l'entité a expiré, à moins que
+l'utilisateur a spécifiquement configuré l'agent pour actualiser les informations expirées
+documents d'histoire.
+
+Remarque : Les candidatures sont encouragées à faire preuve de tolérance envers les mauvaises ou
+implémentations mal informées de l’en-tête Expires. Une valeur de zéro
+(0) ou un format de date invalide doit être considéré comme équivalent à
+un "expire immédiatement". Même si ces valeurs ne sont pas légitimes
+pour HTTP/1.0, une implémentation robuste est toujours souhaitable.
+
+
+
+
+
+
+Berners-Lee et al. Informationnel [Page 41]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+10.8 À partir de
+
+Le champ d'en-tête de requête From, s'il est renseigné, doit contenir un
+adresse e-mail de l'utilisateur humain qui contrôle l'utilisateur demandeur
+agent. L'adresse doit être exploitable par machine, telle que définie par la boîte aux lettres dans
+RFC 822 [7] (telle que mise à jour par la RFC 1123 [6]) :
+
+De = "De" ":"boîte aux lettres
+
+Un exemple est :
+
+De : webmaster@w3.org
+
+Ce champ d'en-tête peut être utilisé à des fins de journalisation et comme moyen de
+identifier la source des demandes invalides ou indésirables. Ça ne devrait pas
+être utilisé comme une forme non sécurisée de protection d’accès. L'interprétation
+de ce champ est que la demande est exécutée au nom du
+personne donnée, qui accepte la responsabilité de la méthode appliquée. Dans
+En particulier, les agents robots doivent inclure cet en-tête afin que le
+la personne responsable du fonctionnement du robot peut être contactée en cas de problème
+se produisent du côté de la réception.
+
+L'adresse e-mail Internet indiquée dans ce champ peut être distincte de l'adresse e-mail Internet indiquée dans ce champ.
+Hôte Internet qui a émis la demande. Par exemple, lorsqu'une demande
+est transmis via un proxy, l'adresse de l'émetteur d'origine doit être
+utilisé.
+
+Remarque : Le client ne doit pas envoyer le champ d'en-tête From sans le
+l'approbation de l'utilisateur, car cela peut entrer en conflit avec la vie privée de l'utilisateur
+intérêts ou la politique de sécurité de leur site. C'est fortement
+Il est recommandé que l'utilisateur puisse désactiver, activer et modifier
+la valeur de ce champ à tout moment avant une requête.
+
+10.9 En cas de modification depuis
+
+Le champ d’en-tête de requête If-Modified-Since est utilisé avec le GET
+méthode pour la rendre conditionnelle : si la ressource demandée n'a pas été
+modifié depuis l'heure précisée dans ce champ, une copie du
+la ressource ne sera pas renvoyée par le serveur ; à la place, un 304 (pas
+modifiée) la réponse sera renvoyée sans aucun corps d'entité.
+
+If-Modified-Since = "If-Modified-Since" ": HTTP-date
+
+Un exemple de champ est :
+
+Si modifié depuis : samedi 29 octobre 1994 à 19:43:31 GMT
+
+
+
+
+
+Berners-Lee et al. Informationnel [Page 42]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+Une méthode GET conditionnelle demande que la ressource identifiée soit
+transféré que s'il a été modifié depuis la date indiquée par le
+En-tête If-Modified-Since. L'algorithme pour déterminer cela comprend
+les cas suivants :
+
+a) Si la demande devait normalement aboutir à autre chose que
+un statut 200 (ok), ou si la date If-Modified-Since est passée
+n'est pas valide, la réponse est exactement la même que pour un
+GET normal. Une date postérieure à la date actuelle du serveur
+l’heure n’est pas valide.
+
+b) Si la ressource a été modifiée depuis le
+Si la date a été modifiée depuis, la réponse est exactement la même que celle
+pour un GET normal.
+
+c) Si la ressource n'a pas été modifiée depuis une période de validité
+Si la date a été modifiée depuis, le serveur doit renvoyer un 304 (et non
+modifiée).
+
+Le but de cette fonctionnalité est de permettre des mises à jour efficaces des fichiers mis en cache
+informations avec un minimum de frais de transaction.
+
+10.10 Dernière modification
+
+Le champ d'en-tête d'entité Last-Modified indique la date et l'heure à
+dont l'expéditeur pense que la ressource a été modifiée pour la dernière fois. L'exact
+la sémantique de ce champ est définie en fonction de la façon dont le destinataire
+doit l'interpréter : si le destinataire possède une copie de cette ressource
+qui est plus ancienne que la date donnée par le champ Last-Modified, cela
+la copie doit être considérée comme périmée.
+
+Last-Modified = "Dernière-Modification" ":" Date HTTP
+
+Un exemple de son utilisation est
+
+Dernière modification : mardi 15 novembre 1994 à 12:45:26 GMT
+
+La signification exacte de ce champ d'en-tête dépend de l'implémentation
+de l’expéditeur et de la nature de la ressource originale. Pour les fichiers, il
+il peut s'agir simplement de l'heure de la dernière modification du système de fichiers. Pour les entités avec
+parties incluses dynamiquement, il peut s'agir de la plus récente de l'ensemble des
+heures de dernière modification pour ses composants. Pour les passerelles de base de données, il
+peut être l'horodatage de la dernière mise à jour de l'enregistrement. Pour les objets virtuels,
+c'est peut-être la dernière fois que l'état interne change.
+
+Un serveur d'origine ne doit pas envoyer une date de dernière modification ultérieure
+que l'heure d'origine du message par le serveur. Dans de tels cas, où
+la dernière modification de la ressource indiquerait quelque temps dans le
+
+
+
+Berners-Lee et al. Informationnel [Page 43]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+futur, le serveur doit remplacer cette date par le message
+date d'origine.
+
+10.11 Localisation
+
+Le champ d'en-tête de réponse Location définit l'emplacement exact du
+ressource qui a été identifiée par le Request-URI. Pour les réponses 3xx,
+l'emplacement doit indiquer l'URL préférée du serveur pour une
+redirection vers la ressource. Une seule URL absolue est autorisée.
+
+Emplacement = "Emplacement" ":" absoluURI
+
+Un exemple est
+
+Emplacement : http://www.w3.org/hypertext/WWW/NewLocation.html
+
+10.12 Pragma
+
+Le champ d'en-tête général Pragma est utilisé pour inclure l'implémentation-
+directives spécifiques qui peuvent s'appliquer à tout destinataire tout au long du
+chaîne de requête/réponse. Toutes les directives pragma spécifient facultatif
+comportement du point de vue du protocole ; cependant, certains systèmes
+peut exiger que le comportement soit conforme aux directives.
+
+Pragma = "Pragma" ":" 1#pragma-directive
+
+pragma-directive = "pas de cache" | extension-pragma
+extension-pragma = jeton [ "=" mot ]
+
+Lorsque la directive "no-cache" est présente dans un message de requête, un
+l'application doit transmettre la requête vers le serveur d'origine même
+s'il a une copie en cache de ce qui est demandé. Cela permet un
+client d'insister pour recevoir une réponse faisant autorité à son
+demande. Il permet également à un client d'actualiser une copie en cache qui est
+connu pour être corrompu ou périmé.
+
+Les directives Pragma doivent être transmises par un proxy ou une passerelle
+demande, quelle que soit leur importance pour cette demande,
+puisque les directives peuvent être applicables à tous les destinataires le long du
+chaîne de requête/réponse. Il n'est pas possible de spécifier un pragma pour un
+destinataire spécifique ; cependant, toute directive pragma non pertinente pour un
+le destinataire doit être ignoré par ce destinataire.
+
+10.13 Référent
+
+Le champ d'en-tête de requête Referer permet au client de spécifier, par exemple
+au bénéfice du serveur, l'adresse (URI) de la ressource à partir de laquelle
+le Request-URI a été obtenu. Cela permet à un serveur de générer des listes
+
+
+
+Berners-Lee et al. Informationnel [Page 44]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+de back-links vers des ressources pour l'intérêt, la journalisation, la mise en cache optimisée,
+etc. Il permet également de retrouver les liens obsolètes ou mal saisis.
+entretien. Le champ Referer ne doit pas être envoyé si le Request-URI
+a été obtenu à partir d'une source qui ne possède pas son propre URI, telle que
+saisie à partir du clavier utilisateur.
+
+Référent = "Référent" ":" ( URI absolu | URI relatif )
+
+Exemple:
+
+Référent : http://www.w3.org/hypertext/DataSources/Overview.html
+
+Si un URI partiel est donné, il doit être interprété par rapport au
+URI de requête. L'URI ne doit pas inclure de fragment.
+
+Remarque : Étant donné que la source d'un lien peut être une information privée ou
+peut révéler une source d'informations par ailleurs privée, il est fortement
+Il est recommandé que l'utilisateur puisse choisir si le
+Le champ référent est envoyé. Par exemple, un client de navigateur pourrait avoir un
+interrupteur à bascule pour une navigation ouverte/anonyme, ce qui
+respectivement activer/désactiver l'envoi de Referer et From
+information.
+
+10.14 Serveur
+
+Le champ d'en-tête de réponse du serveur contient des informations sur le
+logiciel utilisé par le serveur d'origine pour traiter la requête. Le champ
+peut contenir plusieurs jetons de produit (Section 3.7) et des commentaires
+identifier le serveur et tous les sous-produits importants. Par
+convention, les jetons de produit sont répertoriés par ordre de leur
+importance pour l’identification de la demande.
+
+Serveur = "Serveur" ":" 1*( produit | commentaire )
+
+Exemple:
+
+Serveur : CERN/3.0 libwww/2.17
+
+Si la réponse est transmise via un proxy, le proxy
+l'application ne doit pas ajouter ses données à la liste des produits.
+
+Remarque : La révélation de la version spécifique du logiciel du serveur peut
+permettre à la machine serveur de devenir plus vulnérable aux attaques
+contre les logiciels connus pour contenir des failles de sécurité. Serveur
+les implémenteurs sont encouragés à faire de ce champ un champ configurable
+option.
+
+
+
+
+
+Berners-Lee et al. Informationnel [Page 45]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+Remarque : Certains serveurs existants ne parviennent pas à se limiter au
+syntaxe du jeton de produit dans le champ Serveur.
+
+10.15 Agent utilisateur
+
+Le champ d'en-tête de requête User-Agent contient des informations sur le
+agent utilisateur à l’origine de la demande. Ceci est à des fins statistiques,
+le traçage des violations de protocole et la reconnaissance automatisée des utilisateurs
+agents dans le but d'adapter les réponses pour éviter des utilisateurs particuliers
+limites des agents. Bien que cela ne soit pas obligatoire, les agents utilisateurs doivent
+inclure ce champ avec les demandes. Le champ peut contenir plusieurs
+jetons de produit (Section 3.7) et commentaires identifiant l'agent et
+tous les sous-produits qui constituent une partie importante de l’agent utilisateur. Par
+convention, les jetons de produit sont répertoriés par ordre de leur
+importance pour l’identification de la demande.
+
+User-Agent = "User-Agent" ":" 1*( produit | commentaire )
+
+Exemple:
+
+Agent utilisateur : CERN-LineMode/2.15 libwww/2.17b3
+
+Remarque : Certaines applications proxy actuelles ajoutent leur produit
+informations à la liste dans le champ User-Agent. Ce n'est pas
+recommandé, car il permet une interprétation automatique de ces
+domaines ambigus.
+
+Remarque : Certains clients existants ne parviennent pas à se limiter à
+la syntaxe du jeton de produit dans le champ User-Agent.
+
+10.16 WWW-Authentifier
+
+Le champ d’en-tête de réponse WWW-Authenticate doit être inclus dans 401
+messages de réponse (non autorisés). La valeur du champ se compose d'au
+au moins un défi qui indique le(s) schéma(s) d'authentification et
+paramètres applicables au Request-URI.
+
+WWW-Authenticate = "WWW-Authenticate" ":" 1#challenge
+
+Le processus d'authentification d'accès HTTP est décrit à la section 11.
+Les agents utilisateurs doivent prendre un soin particulier lors de l'analyse de l'authentification WWW.
+valeur du champ s'il contient plus d'un défi, ou si plus d'un
+un champ d'en-tête WWW-Authenticate est fourni, puisque le contenu de
+un défi peut lui-même contenir une liste de noms séparés par des virgules
+paramètres d'authentification.
+
+
+
+
+
+
+Berners-Lee et al. Informationnel [Page 46]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+11. Authentification d'accès
+
+HTTP fournit un mécanisme d'authentification simple par défi-réponse
+qui peut être utilisé par un serveur pour contester une requête client et par un
+client pour fournir des informations d’authentification. Il utilise un extensible,
+jeton insensible à la casse pour identifier le schéma d'authentification,
+suivi d'une liste de paires attribut-valeur séparées par des virgules qui
+transporter les paramètres nécessaires pour réaliser l'authentification via ce
+schème.
+
+schéma d'authentification = jeton
+
+auth-param = jeton "=" chaîne entre guillemets
+
+Le message de réponse 401 (non autorisé) est utilisé par un serveur d'origine
+pour contester l’autorisation d’un agent utilisateur. Cette réponse doit
+inclure un champ d'en-tête WWW-Authenticate contenant au moins un
+défi applicable à la ressource demandée.
+
+challenge = schéma d'authentification 1*domaine SP *( "," auth-param )
+
+domaine = "domaine" "=" valeur-domaine
+valeur-domaine = chaîne entre guillemets
+
+L'attribut realm (insensible à la casse) est requis pour tous
+schémas d'authentification qui lancent un défi. La valeur du domaine
+(sensible à la casse), en combinaison avec l'URL racine canonique du
+serveur auquel vous accédez, définit l'espace de protection. Ces royaumes
+permettre aux ressources protégées sur un serveur d'être partitionnées en un
+ensemble d'espaces de protection, chacun avec son propre schéma d'authentification
+et/ou base de données d'autorisation. La valeur du domaine est une chaîne, généralement
+attribué par le serveur d'origine, qui peut avoir une sémantique supplémentaire
+spécifique au schéma d’authentification.
+
+Un agent utilisateur qui souhaite s'authentifier auprès d'un serveur...
+généralement, mais pas nécessairement, après avoir reçu une réponse 401 - peut faire l'affaire
+donc en incluant un champ d’en-tête Authorization avec la demande. Le
+La valeur du champ d'autorisation est constituée d'informations d'identification contenant le
+informations d'authentification de l'agent utilisateur pour le domaine du
+ressource demandée.
+
+informations d'identification = informations d'identification de base
+| ( schéma d'authentification #auth-param )
+
+Le domaine sur lequel les informations d'identification peuvent être automatiquement appliquées par un
+L'agent utilisateur est déterminé par l'espace de protection. Si une demande préalable
+a été autorisé, les mêmes informations d'identification peuvent être réutilisées pour tous les autres
+demandes au sein de cet espace de protection pour une période de temps déterminée
+
+
+
+Berners-Lee et al. Informationnel [Page 47]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+par le schéma d'authentification, les paramètres et/ou les préférences de l'utilisateur.
+Sauf indication contraire dans le schéma d'authentification, un seul
+l'espace de protection ne peut pas s'étendre en dehors du périmètre de son serveur.
+
+Si le serveur ne souhaite pas accepter les informations d'identification envoyées avec un
+requête, il doit renvoyer une réponse 403 (interdite).
+
+Le protocole HTTP ne limite pas les applications à ce simple
+mécanisme de défi-réponse pour l’authentification d’accès. Supplémentaire
+des mécanismes peuvent être utilisés, tels que le cryptage au niveau du transport ou
+via l'encapsulation du message et avec des champs d'en-tête supplémentaires
+spécifiant les informations d'authentification. Cependant, ces suppléments
+les mécanismes ne sont pas définis par cette spécification.
+
+Les proxys doivent être totalement transparents concernant l’agent utilisateur
+authentification. Autrement dit, ils doivent transmettre l'authentification WWW et
+Les en-têtes d'autorisation ne sont pas modifiés et ne doivent pas mettre en cache la réponse à un
+demande contenant l’autorisation. HTTP/1.0 ne fournit pas de moyen
+pour qu'un client soit authentifié avec un proxy.
+
+11.1 Schéma d'authentification de base
+
+Le schéma d'authentification « de base » est basé sur le modèle que l'utilisateur
+l'agent doit s'authentifier avec un identifiant et un mot de passe pour chaque
+royaume. La valeur du domaine doit être considérée comme une chaîne opaque qui
+ne peut être comparé qu'en termes d'égalité avec d'autres domaines sur ce serveur.
+Le serveur n'autorisera la demande que s'il peut valider le
+user-ID et mot de passe pour l’espace de protection du Request-URI.
+Il n'y a pas de paramètres d'authentification facultatifs.
+
+Dès réception d'une demande non autorisée d'URI dans le
+espace de protection, le serveur doit répondre avec un défi comme le
+suivant:
+
+WWW-Authentifier : Basic realm="WallyWorld"
+
+où "WallyWorld" est la chaîne attribuée par le serveur pour identifier
+l’espace de protection du Request-URI.
+
+Pour recevoir l'autorisation, le client envoie l'identifiant et le mot de passe,
+séparés par un seul caractère deux-points (":"), en base64 [5]
+chaîne codée dans les informations d'identification.
+
+informations d'identification de base = "Basique" SP cookie de base
+
+basic-cookie = <base64 [5] encodage du mot de passe userid,
+sauf non limité à 76 caractères/ligne>
+
+
+
+
+Berners-Lee et al. Informationnel [Page 48]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+ID utilisateur-mot de passe = [jeton] ":" *TEXTE
+
+Si l'agent utilisateur souhaite envoyer l'identifiant "Aladdin" et le mot de passe
+" sésame ouvert ", il utiliserait le champ d'en-tête suivant :
+
+Autorisation : Basique QWxhZGRpbjpvcGVuIHNlc2FtZQ==
+
+Le schéma d'authentification de base est une méthode de filtrage non sécurisée
+accès non autorisé aux ressources sur un serveur HTTP. C'est basé sur
+l'hypothèse que la connexion entre le client et le serveur
+peut être considéré comme un transporteur de confiance. Comme ce n'est généralement pas vrai
+sur un réseau ouvert, le schéma d'authentification de base doit être utilisé
+par conséquent. Malgré cela, les clients doivent mettre en œuvre le programme dans
+afin de communiquer avec les serveurs qui l'utilisent.
+
+12. Considérations de sécurité
+
+Cette section est destinée à informer les développeurs d'applications, les informations
+fournisseurs et utilisateurs des limitations de sécurité dans HTTP/1.0 comme
+décrit par ce document. La discussion n'inclut pas
+des solutions définitives aux problèmes révélés, même si cela donne
+quelques suggestions pour réduire les risques de sécurité.
+
+12.1 Authentification des Clients
+
+Comme mentionné à la section 11.1, le schéma d'authentification de base n'est pas
+une méthode sécurisée d'authentification de l'utilisateur, et cela n'empêche pas non plus le
+Entité-Corps d'être transmis en texte clair à travers le physique
+réseau utilisé comme transporteur. HTTP/1.0 n'empêche pas les
+les schémas d'authentification et les mécanismes de cryptage ne sont pas utilisés
+pour accroître la sécurité.
+
+12.2 Méthodes sûres
+
+Les auteurs de logiciels clients doivent être conscients que le logiciel
+représente l'utilisateur dans ses interactions sur Internet, et
+doit veiller à permettre à l'utilisateur d'être conscient de toutes les actions qu'il
+peuvent prendre ce qui peut avoir une signification inattendue pour eux-mêmes ou
+autres.
+
+En particulier, il a été établi une convention selon laquelle l'EEG et
+Les méthodes HEAD ne devraient jamais avoir l’importance d’entreprendre une action
+autre que la récupération. Ces méthodes doivent être considérées comme « sûres ». Ce
+permet aux agents utilisateurs de représenter d'autres méthodes, telles que POST, dans un
+manière particulière, afin que l'utilisateur soit informé du fait qu'un
+une action potentiellement dangereuse est demandée.
+
+
+
+
+
+Berners-Lee et al. Informationnel [Page 49]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+Bien entendu, il n'est pas possible de garantir que le serveur ne
+générer des effets secondaires suite à l'exécution d'une requête GET ; dans
+en fait, certaines ressources dynamiques considèrent cela comme une fonctionnalité. L'important
+la distinction ici est que l'utilisateur n'a pas demandé les effets secondaires,
+nous ne pouvons donc en être tenus responsables.
+
+12.3 Abus des informations du journal du serveur
+
+Un serveur est en mesure de sauvegarder des données personnelles sur un utilisateur
+demandes qui peuvent identifier leurs habitudes de lecture ou leurs sujets de
+intérêt. Ces informations sont clairement de nature confidentielle et leur
+la manipulation peut être limitée par la loi dans certains pays. Les personnes utilisant
+le protocole HTTP pour fournir les données est chargé de garantir que
+ce matériel n'est pas distribué sans l'autorisation de quiconque
+individus identifiables par les résultats publiés.
+
+12.4 Transfert d'informations sensibles
+
+Comme tout protocole générique de transfert de données, HTTP ne peut pas réguler le
+contenu des données transférées, ni aucune information a priori
+méthode de détermination de la sensibilité d’un élément particulier de
+informations dans le cadre d’une demande donnée. Donc,
+les applications devraient fournir autant de contrôle sur ces informations que
+possible au fournisseur de ces informations. Trois champs d'en-tête sont
+méritent une mention particulière dans ce contexte : Server, Referer et From.
+
+Révéler la version spécifique du logiciel du serveur peut permettre au
+la machine serveur devient plus vulnérable aux attaques contre les logiciels
+qui est connu pour contenir des failles de sécurité. Les responsables de la mise en œuvre devraient faire le
+Champ d’en-tête du serveur, une option configurable.
+
+Le champ Referer permet d'étudier et d'inverser les modèles de lecture
+liens dessinés. Bien qu’il puisse être très utile, son pouvoir peut être abusé
+si les détails de l'utilisateur ne sont pas séparés des informations contenues dans
+le Référent. Même lorsque les informations personnelles ont été supprimées, le
+Le champ référent peut indiquer l'URI d'un document privé dont la publication
+serait inapproprié.
+
+Les informations envoyées dans le champ De peuvent entrer en conflit avec celles de l'utilisateur.
+intérêts de confidentialité ou la politique de sécurité de leur site, et donc il
+ne doit pas être transmis sans que l'utilisateur puisse désactiver,
+activer et modifier le contenu du champ. L'utilisateur doit pouvoir
+pour définir le contenu de ce champ dans une préférence utilisateur ou
+configuration des paramètres par défaut de l'application.
+
+Nous suggérons, sans toutefois l'exiger, qu'une interface à bascule pratique
+être fourni à l'utilisateur pour activer ou désactiver l'envoi de From et
+Informations sur le référent.
+
+
+
+Berners-Lee et al. Informationnel [Page 50]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+12.5 Attaques basées sur les noms de fichiers et de chemins
+
+Les implémentations de serveurs d'origine HTTP doivent veiller à restreindre
+les documents renvoyés par les requêtes HTTP soient uniquement ceux qui ont été
+prévu par les administrateurs du serveur. Si un serveur HTTP traduit
+URI HTTP directement dans les appels du système de fichiers, le serveur doit prendre
+attention particulière à ne pas signifier des fichiers qui n'étaient pas destinés à être
+livré aux clients HTTP. Par exemple, Unix, Microsoft Windows et
+d'autres systèmes d'exploitation utilisent ".." comme composant de chemin pour indiquer un
+niveau du répertoire au-dessus du niveau actuel. Sur un tel système, un HTTP
+Le serveur doit interdire toute construction de ce type dans le Request-URI s'il
+permettrait autrement l'accès à une ressource en dehors de celles destinées à
+être accessible via le serveur HTTP. De même, les fichiers destinés à
+référence uniquement en interne au serveur (comme le contrôle d'accès
+fichiers, fichiers de configuration et code de script) doivent être protégés contre
+récupération inappropriée, car ils peuvent contenir des informations sensibles
+information. L'expérience a montré que des bugs mineurs dans un tel serveur HTTP
+les mises en œuvre se sont transformées en risques pour la sécurité.
+
+13. Remerciements
+
+Cette spécification fait un usage intensif du BNF augmenté et du générique
+constructions définies par David H. Crocker pour la RFC 822 [7]. De même, il
+réutilise de nombreuses définitions fournies par Nathaniel Borenstein et
+Ned Freed pour MIME [5]. Nous espérons que leur inclusion dans ce
+la spécification aidera à réduire la confusion passée sur la relation
+entre les formats de messages HTTP/1.0 et Internet.
+
+Le protocole HTTP a considérablement évolué au cours des quatre dernières années.
+Il a bénéficié d'une communauté de développeurs importante et active :
+de nombreuses personnes qui ont participé à la liste de diffusion www-talk - et
+c'est cette communauté qui est la plus responsable du succès
+du HTTP et du World-Wide Web en général. Marc Andreessen, Robert
+Cailliau, Daniel W. Connolly, Bob Denny, Jean-François Groff, Phillip
+M. Hallam-Baker, Hakon W. Lie, Ari Luotonen, Rob McCool, Lou
+Montulli, Dave Raggett, Tony Sanders et Marc VanHeyningen méritent
+une reconnaissance spéciale pour leurs efforts dans la définition des aspects de la
+protocole pour les premières versions de cette spécification.
+
+Paul Hoffman a contribué aux sections concernant le statut informationnel
+de ce document et les annexes C et D.
+
+
+
+
+
+
+
+
+
+
+Berners-Lee, et al. Informationnel [Page 51]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+Ce document a grandement bénéficié des commentaires de tous ceux
+participer au HTTP-WG. En plus de ceux déjà mentionnés,
+les personnes suivantes ont contribué à cette spécification :
+
+Gary AdamsHarald Tveit Alvestrand
+Keith BallBrian Behlendorf
+Paul Burchard, Maurizio Codogno
+Mike CowlishawRoman Czyborra
+Michael A. DolanJohn Franks
+Jim GettysMarc Hedlund
+Koen HoltmanAlex Hopmann
+Bob JerniganShel Kaphan
+Martijn KosterDave Kristol
+Daniel La Liberté Paul Leach
+Albert Lunde John C. Mallery
+Larry Masinter Mitra
+Jeffrey MogulGavin Nicol
+Bill PerryJeffrey Perry
+Owen Rees Luigi Rizzo
+David RobinsonMarc Salomon
+Riche Salz Jim Seidman
+Chuck Shotton Eric W. Évier
+Simon E. Spero Robert S. Thau
+François Yergeau Mary Ellen Zurko
+Jean-Philippe Martin-Flatin
+
+14. Références
+
+[1] Anklesaria, F., McCahill, M., Lindner, P., Johnson, D.,
+Torrey, D. et B. Alberti, « Le protocole Internet Gopher : A
+Protocole de recherche et de récupération de documents distribués", RFC 1436,
+Université du Minnesota, mars 1993.
+
+[2] Berners-Lee, T., « Identificateurs de ressources universels sur le Web : A
+Syntaxe unificatrice pour l'expression des noms et adresses des
+Objets sur le réseau tels qu'utilisés dans le World-Wide Web",
+RFC 1630, CERN, juin 1994.
+
+[3] Berners-Lee, T. et D. Connolly, "Langage de balisage hypertexte -
+2.0", RFC 1866, MIT/W3C, novembre 1995.
+
+[4] Berners-Lee, T., Masinter, L. et M. McCahill, "Uniform
+Localisateurs de ressources (URL)", RFC 1738, CERN, Xerox PARC,
+Université du Minnesota, décembre 1994.
+
+
+
+
+
+
+
+Berners-Lee et coll. Informationnel [Page 52]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+[5] Borenstein, N. et N. Freed, "MIME (MultiPurpose Internet Mail
+Extensions) Première partie : Mécanismes de spécification et de description
+le format des corps des messages Internet", RFC 1521, Bellcore,
+Innosoft, septembre 1993.
+
+[6] Braden, R., "Exigences pour les hôtes Internet - Application et
+Support", STD 3, RFC 1123, IETF, octobre 1989.
+
+[7] Crocker, D., "Norme pour le format du texte Internet ARPA
+Messages", STD 11, RFC 822, UDEL, août 1982.
+
+[8] F. Davis, B. Kahle, H. Morris, J. Salem, T. Shen, R. Wang,
+J. Sui et M. Grinbaum. "Prototype de protocole d'interface WAIS
+Spécification fonctionnelle. » (v1.5), Thinking Machines
+Société, avril 1990.
+
+[9] R. Fielding, "Localisateurs de ressources uniformes relatifs", RFC 1808,
+UC Irvine, juin 1995.
+
+[10] Horton, M. et R. Adams, "Standard pour l'échange de USENET
+Messages", RFC 1036 (obsolète RFC 850), AT&T Bell
+Laboratoires, Centre d'études sismiques, décembre 1987.
+
+[11] Kantor, B. et P. Lapsley, « Network News Transfer Protocol :
+Une proposition de norme pour la transmission d'informations par flux",
+RFC 977, UC San Diego, UC Berkeley, février 1986.
+
+[12] Postel, J., « Protocole de transfert de courrier simple ». NORME 10, RFC 821,
+USC/ISI, août 1982.
+
+[13] Postel, J., "Procédure d'enregistrement du type de média". RFC1590,
+USC/ISI, mars 1994.
+
+[14] Postel, J. et J. Reynolds, "File Transfer Protocol (FTP)",
+STD 9, RFC 959, USC/ISI, octobre 1985.
+
+[15] J. Reynolds et J. Postel, "Numéros attribués", STD 2, RFC
+1700, USC/ISI, octobre 1994.
+
+[16] Sollins, K. et L. Masinter, « Exigences fonctionnelles pour
+Noms de ressources uniformes", RFC 1737, MIT/LCS, Xerox Corporation,
+Décembre 1994.
+
+[17] US-ASCII. Jeu de caractères codés - Code standard américain 7 bits
+pour l’échange d’informations. Norme ANSI X3.4-1986, ANSI,
+1986.
+
+
+
+
+
+Berners-Lee, et al. Informationnel [Page 53]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+[18] ISO-8859. Norme internationale -- Traitement de l'information --
+Jeux de caractères graphiques codés sur un octet sur 8 bits --
+Partie 1 : Alphabet latin n° 1, ISO 8859-1:1987.
+Partie 2 : Alphabet latin n°2, ISO 8859-2, 1987.
+Partie 3 : Alphabet latin n° 3, ISO 8859-3, 1988.
+Partie 4 : Alphabet latin n° 4, ISO 8859-4, 1988.
+Partie 5 : Alphabet latin/cyrillique, ISO 8859-5, 1988.
+Partie 6 : Alphabet latin/arabe, ISO 8859-6, 1987.
+Partie 7 : alphabet latin/grec, ISO 8859-7, 1987.
+Partie 8 : alphabet latin/hébreu, ISO 8859-8, 1988.
+Partie 9 : Alphabet latin n° 5, ISO 8859-9, 1990.
+
+15. Adresses des auteurs
+
+Tim Berners-Lee
+Directeur, Consortium W3
+Laboratoire d'informatique du MIT
+545 Place de la Technologie
+Cambridge, MA 02139, États-Unis
+
+Télécopie : +1 (617) 258 8682
+Courriel : timbl@w3.org
+
+
+Roy T. Fielding
+Département d'information et d'informatique
+Université de Californie
+Irvine, Californie 92717-3425, États-Unis
+
+Télécopieur : +1 (714) 824-4056
+Courriel : fielding@ics.uci.edu
+
+
+Henrik Frystyk Nielsen
+Consortium W3
+Laboratoire d'informatique du MIT
+545 Place de la Technologie
+Cambridge, MA 02139, États-Unis
+
+Télécopie : +1 (617) 258 8682
+Courriel : friedstyk@w3.org
+
+
+
+
+
+
+
+
+
+
+Berners-Lee et al. Informationnel [Page 54]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+Annexes
+
+Ces annexes sont fournies à titre informatif uniquement - elles
+ne font pas partie de la spécification HTTP/1.0.
+
+A. Message de type de média Internet/http
+
+En plus de définir le protocole HTTP/1.0, ce document sert
+comme spécification pour le type de média Internet « message/http ». Le
+Ce qui suit doit être enregistré auprès de l'IANA [13].
+
+Nom du type de média : message
+
+Nom du sous-type de média : http
+
+Paramètres requis : aucun
+
+Paramètres facultatifs : version, msgtype
+
+version : le numéro de version HTTP du message ci-joint
+(par exemple, "1,0"). Si elle n'est pas présente, la version peut être
+déterminé à partir de la première ligne du corps.
+
+msgtype : le type de message – « demande » ou « réponse ». Si
+pas présent, le type peut être déterminé à partir du
+première ligne du corps.
+
+Considérations d'encodage : seuls "7 bits", "8 bits" ou "binaire" sont
+permis
+
+Considérations de sécurité : aucune
+
+B. Applications tolérantes
+
+Bien que ce document spécifie les exigences pour la génération
+des messages HTTP/1.0, toutes les applications ne seront pas correctes dans leur
+mise en œuvre. Nous recommandons donc que les applications opérationnelles
+être tolérant envers les écarts chaque fois que ces écarts peuvent être
+interprété sans ambiguïté.
+
+Les clients doivent être tolérants dans l'analyse de la Status-Line et des serveurs
+tolérant lors de l'analyse de la Request-Line. En particulier, ils devraient
+accepter n'importe quelle quantité de caractères SP ou HT entre les champs, même si
+un seul SP est requis.
+
+Le terminateur de ligne pour les champs d'en-tête HTTP est la séquence CRLF.
+Cependant, nous recommandons aux applications, lors de l'analyse de ces en-têtes,
+reconnaître un seul LF comme terminateur de ligne et ignorer le CR principal.
+
+
+
+Berners-Lee et coll. Informationnel [Page 55]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+C. Relation avec MIME
+
+HTTP/1.0 utilise de nombreuses constructions définies pour Internet Mail (RFC
+822 [7]) et les extensions de messagerie Internet polyvalentes (MIME [5]) pour
+permettre aux entités d'être transmises dans une variété ouverte de
+représentations et avec des mécanismes extensibles. Cependant, la RFC 1521
+traite du courrier, et HTTP possède quelques fonctionnalités différentes de celles
+celles décrites dans la RFC 1521. Ces différences ont été soigneusement choisies
+pour optimiser les performances sur les connexions binaires, pour permettre une plus grande
+liberté dans l'utilisation de nouveaux types de médias, pour faire des comparaisons de dates
+plus facile, et de reconnaître la pratique de certains premiers serveurs HTTP
+et clients.
+
+Au moment d'écrire ces lignes, il est prévu que la RFC 1521 soit
+modifié. Les révisions peuvent inclure certaines des pratiques trouvées dans
+HTTP/1.0 mais pas dans RFC 1521.
+
+Cette annexe décrit les domaines spécifiques dans lesquels HTTP diffère de RFC.
+1521. Les proxys et les passerelles vers des environnements MIME stricts doivent être
+conscient de ces différences et fournir les conversions appropriées
+Où il faut. Proxy et passerelles des environnements MIME vers HTTP
+vous devez également être conscient des différences, car certaines conversions peuvent
+être requis.
+
+C.1 Conversion à la forme canonique
+
+La RFC 1521 exige qu'une entité de messagerie Internet soit convertie en
+forme canonique avant d’être transférée, comme décrit à l’Annexe G
+de la RFC 1521 [5]. La section 3.6.1 de ce document décrit les formulaires
+autorisé pour les sous-types du type de média "texte" lorsqu'ils sont transmis via
+HTTP.
+
+La RFC 1521 exige que le contenu avec un type de contenu de « texte »
+représente les sauts de ligne comme CRLF et interdit l'utilisation de CR ou LF à l'extérieur
+de séquences de sauts de ligne. HTTP permet à CRLF, Bare CR et Bare LF de
+indiquer un saut de ligne dans le contenu du texte lorsqu'un message est
+transmis via HTTP.
+
+Lorsque cela est possible, un proxy ou une passerelle HTTP vers un RFC strict
+L'environnement 1521 doit traduire tous les sauts de ligne dans le texte
+types de médias décrits dans la section 3.6.1 de ce document à la RFC
+1521 forme canonique de CRLF. Notez cependant que cela peut être
+compliqué par la présence d'un Content-Encoding et par le fait
+que HTTP permet l'utilisation de certains jeux de caractères qui n'utilisent pas
+les octets 13 et 10 pour représenter CR et LF, comme c'est le cas pour certains
+jeux de caractères multi-octets.
+
+
+
+
+
+Berners-Lee et coll. Informationnel [Page 56]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+C.2 Conversion des formats de date
+
+HTTP/1.0 utilise un ensemble restreint de formats de date (Section 3.3) pour
+simplifier le processus de comparaison de dates. Proxy et passerelles de
+d'autres protocoles devraient garantir que tout champ d'en-tête Date présent dans un
+le message est conforme à l'un des formats HTTP/1.0 et réécrivez la date
+si nécessaire.
+
+C.3 Introduction du codage de contenu
+
+La RFC 1521 n'inclut aucun concept équivalent à celui de HTTP/1.0
+Champ d’en-tête Content-Encoding. Puisque cela agit comme un modificateur sur le
+type de média, proxys et passerelles de HTTP à compatible MIME
+les protocoles doivent soit modifier la valeur de l'en-tête Content-Type
+ou décoder le corps d'entité avant de transmettre le message. (Quelques
+des applications expérimentales de Content-Type pour la messagerie Internet ont utilisé
+un paramètre de type de média de ";conversions=<content-coding>" à effectuer
+une fonction équivalente à Content-Encoding. Cependant, ce paramètre
+ne fait pas partie de la RFC 1521.)
+
+C.4 Pas de codage de transfert de contenu
+
+HTTP n'utilise pas le champ Content-Transfer-Encoding (CTE) de la RFC
+1521. Les proxys et les passerelles des protocoles compatibles MIME vers HTTP doivent
+supprimer tout encodage CTE non identitaire ("quoted-printable" ou "base64")
+avant de transmettre le message de réponse à un client HTTP.
+
+Les proxys et les passerelles des protocoles compatibles HTTP vers MIME sont
+responsable de s’assurer que le message est dans le bon format
+et le codage pour un transport sûr sur ce protocole, où « sécurisé
+transport" est défini par les limitations du protocole utilisé.
+Un tel proxy ou passerelle doit étiqueter les données avec un
+Content-Transfer-Encoding si cela améliorera la probabilité de
+transport sûr selon le protocole de destination.
+
+C.5 Champs d'en-tête HTTP dans les parties de corps en plusieurs parties
+
+Dans la RFC 1521, la plupart des champs d'en-tête dans les parties de corps en plusieurs parties sont généralement
+ignoré sauf si le nom du champ commence par "Contenu-". En HTTP/1.0,
+les parties de corps en plusieurs parties peuvent contenir des champs d'en-tête HTTP qui sont
+significatif pour le sens de cette partie.
+
+D. Fonctionnalités supplémentaires
+
+Cette annexe documente les éléments de protocole utilisés par certains protocoles HTTP existants.
+implémentations, mais pas de manière cohérente et correcte dans la plupart des
+Applications HTTP/1.0. Les responsables de la mise en œuvre doivent en être conscients
+fonctionnalités, mais ne peut pas compter sur leur présence ou leur interopérabilité
+
+
+
+Berners-Lee et al. Informationnel [Page 57]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+avec d'autres applications HTTP/1.0.
+
+D.1 Méthodes de requête supplémentaires
+
+D.1.1 METTRE
+
+La méthode PUT demande que l'entité incluse soit stockée sous le
+fourni l'URI de requête. Si le Request-URI fait référence à un déjà
+ressource existante, l’entité incluse doit être considérée comme une
+version modifiée de celle résidant sur le serveur d'origine. Si la
+Request-URI ne pointe pas vers une ressource existante et cet URI est
+susceptible d'être défini comme une nouvelle ressource par l'utilisateur demandeur
+agent, le serveur d'origine peut créer la ressource avec cet URI.
+
+La différence fondamentale entre les requêtes POST et PUT est
+reflété dans la signification différente du Request-URI. L'URI dans un
+La requête POST identifie la ressource qui gérera le fichier ci-joint
+entité comme données à traiter. Cette ressource peut être un système acceptant les données
+processus, une passerelle vers un autre protocole ou une entité distincte qui
+accepte les annotations. En revanche, l'URI dans une requête PUT identifie
+l'entité jointe à la requête -- l'agent utilisateur sait quel URI
+est prévu et le serveur ne doit pas appliquer la demande à un autre
+Ressource.
+
+D.1.2 SUPPRIMER
+
+La méthode DELETE demande au serveur d'origine de supprimer la ressource
+identifié par le Request-URI.
+
+D.1.3 LIEN
+
+La méthode LINK établit une ou plusieurs relations Link entre
+la ressource existante identifiée par le Request-URI et d'autres
+ressources existantes.
+
+D.1.4 DÉTACHER LE LIEN
+
+La méthode UNLINK supprime une ou plusieurs relations Link du
+ressource existante identifiée par le Request-URI.
+
+D.2 Définitions supplémentaires des champs d'en-tête
+
+D.2.1 Accepter
+
+Le champ d'en-tête de demande Accepter peut être utilisé pour indiquer une liste de
+gammes de médias acceptables en réponse à la demande. Le
+Le caractère astérisque "*" est utilisé pour regrouper les types de médias en plages, avec
+"*/*" indiquant tous les types de médias et "type/*" indiquant tous les sous-types
+
+
+
+Berners-Lee et al. Informationnel [Page 58]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+de ce type. L'ensemble des fourchettes données par le client doit représenter
+quels types sont acceptables compte tenu du contexte de la demande.
+
+D.2.2 Accepter le jeu de caractères
+
+Le champ d'en-tête de requête Accept-Charset peut être utilisé pour indiquer un
+liste des jeux de caractères préférés autres que l'US-ASCII par défaut et
+ISO-8859-1. Ce champ permet aux clients capables de mieux comprendre
+jeux de caractères complets ou spéciaux pour signaler que
+capacité à un serveur capable de représenter des documents dans
+ces jeux de caractères.
+
+D.2.3 Accepter le codage
+
+Le champ d’en-tête de requête Accept-Encoding est similaire à Accept, mais
+restreint les valeurs de codage de contenu qui sont acceptables dans le
+réponse.
+
+D.2.4 Accepter la langue
+
+Le champ d'en-tête de requête Accept-Language est similaire à Accept, mais
+restreint l'ensemble des langues naturelles qui sont préférées comme langue
+réponse à la demande.
+
+D.2.5 Contenu-Langage
+
+Le champ d’en-tête d’entité Content-Language décrit le
+langue(s) du public visé pour l'entité ci-jointe. Note
+que cela n'est peut-être pas équivalent à toutes les langues utilisées dans le
+entité.
+
+D.2.6 Lien
+
+Le champ d'en-tête d'entité Link fournit un moyen de décrire un
+relation entre l’entité et une autre ressource. Une entité
+peut inclure plusieurs valeurs de lien. Liens au niveau des métainformations
+indiquent généralement des relations telles que la structure hiérarchique et
+chemins de navigation.
+
+D.2.7 Version MIME
+
+Les messages HTTP peuvent inclure un seul champ d'en-tête général MIME-Version
+pour indiquer quelle version du protocole MIME a été utilisée pour construire
+le message. Utilisation du champ d'en-tête MIME-Version, tel que défini par RFC
+1521 [5], devrait indiquer que le message est conforme à MIME.
+Malheureusement, certains anciens serveurs HTTP/1.0 l'envoient sans discernement,
+et donc ce champ doit être ignoré.
+
+
+
+
+Berners-Lee et al. Informationnel [Page 59]
+ 
+RFC 1945 HTTP/1.0 mai 1996
+
+
+D.2.8 Réessayer après
+
+Le champ d’en-tête de réponse Retry-After peut être utilisé avec un 503 (service
+indisponible) réponse pour indiquer la durée pendant laquelle le service est prévu
+être indisponible pour le client demandeur. La valeur de ce champ peut
+être soit une date HTTP, soit un nombre entier de secondes (en décimal)
+après l'heure de la réponse.
+
+D.2.9 Titre
+
+Le champ d'en-tête d'entité Titre indique le titre de l'entité.
+
+D.2.10 URI
+
+Le champ d'en-tête d'entité URI peut contenir tout ou partie des informations uniformes.
+Identifiants de ressource (Section 3.2) par lesquels la ressource Request-URI
+Peut être identifié. Il n'y a aucune garantie que la ressource puisse être
+accessible à l’aide du ou des URI spécifiés.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Berners-Lee et al. Informationnel [Page 60]
+ 
